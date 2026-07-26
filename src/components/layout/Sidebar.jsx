@@ -8,18 +8,35 @@ import {
   FiBarChart2,
   FiSettings,
   FiLogOut,
+  FiX
 } from "react-icons/fi";
 
-function Sidebar() {
+function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-slate-300 flex flex-col">
+    <aside
+            className={`
+            fixed top-0 left-0 z-50
+            w-64 h-screen bg-slate-900 text-slate-300 flex flex-col
+            transform transition-transform duration-300
+          ${
+              isSidebarOpen
+             ? "translate-x-0"
+             : "-translate-x-full"
+             }
+              lg:translate-x-0 lg:static`}>
+
 
       {/* Logo */}
-      <div className="h-20 flex items-center px-6 border-b border-slate-700">
+      <div className="h-20 flex items-center justify-between px-6 border-b border-slate-700">
         <h1 className="text-3xl font-bold">
           <span className="text-blue-500">Biz</span>
           <span className="text-white">Flow</span>
         </h1>
+         <button className=" md:hidden text-white text-2xl hover:text-blue-400"
+         onClick={()=>setIsSidebarOpen(false)}
+         >
+               <FiX />
+        </button>
       </div>
 
       {/* Navigation */}

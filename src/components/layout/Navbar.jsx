@@ -5,7 +5,7 @@ import {
   FiMenu,
 } from "react-icons/fi";
 
-function Navbar() {
+function Navbar({setIsSidebarOpen}) {
   return (
     <header className="h-16 bg-slate-200 border-b border-slate-300 shadow-sm px-4 
      md:px-6 flex items-center justify-between">
@@ -14,7 +14,7 @@ function Navbar() {
       <div className="flex items-center gap-4">
 
         {/* Mobile Menu */}
-        <button className="md:hidden text-2xl text-slate-700 hover:text-blue-600">
+        <button className="md:hidden text-2xl text-slate-700 hover:text-blue-600" onClick={() => setIsSidebarOpen(true)}>
           <FiMenu />
         </button>
 
