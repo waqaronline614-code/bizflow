@@ -18,6 +18,12 @@ function DashboardLayout() {
       <div className="flex flex-1">
 
         <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+         {isSidebarOpen && (
+          <div
+             className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+             onClick={() => setIsSidebarOpen(false)}
+           ></div>
+          )}
 
         <main className="flex-1 bg-slate-100 p-8">
           <Outlet />
