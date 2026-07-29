@@ -16,7 +16,7 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
     <aside
             className={`
             fixed top-0 left-0 z-50
-            w-64 h-full min-h-screen bg-slate-900 text-slate-300 flex flex-col
+            w-64  bg-slate-900 text-slate-300 flex flex-col
             transform transition-transform duration-300
           ${
               isSidebarOpen

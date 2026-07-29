@@ -15,7 +15,7 @@ function StatCard({ title, value, icon, growth }) {
     >
       <div className="h-1 bg-blue-600"></div>
 
-      <div className="p-6">
+      <div className="p-4">
 
         <div className="flex items-center justify-between">
 
@@ -24,12 +24,13 @@ function StatCard({ title, value, icon, growth }) {
               {title}
             </p>
 
-            <h2 className="text-3xl font-bold mt-2 text-slate-900">
+            <h2 className="text-2xl font-bold mt-2 text-slate-900">
               {value}
             </h2>
           </div>
 
-          <div className="w-14 h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-3xl">
+          <div className="w-14 h-14 rounded-xl bg-blue-100
+           text-blue-600 flex items-center justify-center text-2xl">
             {icon}
           </div>
 
@@ -37,7 +38,7 @@ function StatCard({ title, value, icon, growth }) {
 
         <div className="mt-6 flex items-center gap-2">
 
-          <span className="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+          <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
             ▲ {growth}
           </span>
 
