@@ -36,7 +36,7 @@ function StatCard({ title, value, icon, growth }) {
 
         </div>
 
-        <div className="mt-6 flex items-center gap-2">
+        <div className="mt-6 flex items-center gap-1">
 
           <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
             ▲ {growth}

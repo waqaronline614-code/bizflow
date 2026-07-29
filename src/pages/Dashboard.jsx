@@ -8,12 +8,13 @@ import {
 import StatCard from "../components/dashboard/StatCard";
 import SalesChart from "../components/dashboard/SalesChart";
 import RevenueChart from "../components/dashboard/RevenueChart";
+import RecentOrders from '../components/dashboard/RecentOrders'
 
 function Dashboard() {
   return (
     <div>
       {/* Heading */}
-      <div className="mb-8">
+      <div className="mb-4">
         <h1 className="text-3xl font-bold text-slate-800">
           Welcome Back, Waqar 👋
         </h1>
@@ -27,7 +28,7 @@ function Dashboard() {
       {/* Statistics Cards */}
       {/* ===================== */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
 
         <StatCard
           title="Revenue"
@@ -63,12 +64,20 @@ function Dashboard() {
       {/* Charts */}
       {/* ===================== */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           <div className="lg:col-span-2">
              <SalesChart />
           </div>
               <RevenueChart />
-          </div> 
+      </div> 
+
+          {/* ===================== */}
+              {/* RecentOrders*/}
+         {/* ===================== */}
+
+         <div className="">         
+              <RecentOrders/>
+         </div>
     </div>
   );
 }
