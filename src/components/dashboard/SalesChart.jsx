@@ -21,9 +21,17 @@ const salesData = [
 function SalesChart() {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-slate-800 mb-6">
-        Sales Overview
-      </h2>
+        <div className="flex items-center justify-between mb-6">
+
+        <h2 className="text-xl font-semibold text-slate-800">
+          Sales Overview
+        </h2>
+
+        <button className="text-sm font-medium text-blue-600 hover:text-blue-700">
+          View All
+        </button>
+
+      </div>
 
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">

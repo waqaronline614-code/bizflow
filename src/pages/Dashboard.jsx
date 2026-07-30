@@ -7,8 +7,11 @@ import {
 
 import StatCard from "../components/dashboard/StatCard";
 import SalesChart from "../components/dashboard/SalesChart";
-import RevenueChart from "../components/dashboard/RevenueChart";
+import TopCustomersChart from "../components/dashboard/TopCustomersChart";
 import RecentOrders from '../components/dashboard/RecentOrders'
+import TopProducts from "../components/dashboard/TopProducts";
+import LowStockAlert from "../components/dashboard/LowStockAlert";
+
 
 function Dashboard() {
   return (
@@ -68,16 +71,23 @@ function Dashboard() {
           <div className="lg:col-span-2">
              <SalesChart />
           </div>
-              <RevenueChart />
+              <TopCustomersChart />
       </div> 
 
           {/* ===================== */}
               {/* RecentOrders*/}
          {/* ===================== */}
 
-         <div className="">         
+         <div>         
               <RecentOrders/>
          </div>
+           {/* ===================== */}
+              {/*TopProducts , RecentCustomers ,LowStockAlert */}
+         {/* ===================== */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+              <TopProducts/>
+              <LowStockAlert/>
+          </div>
     </div>
   );
 }
