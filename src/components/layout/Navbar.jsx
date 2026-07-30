@@ -7,7 +7,7 @@ import {
 
 function Navbar({setIsSidebarOpen}) {
   return (
-    <header className="h-16 bg-slate-200 border-b border-slate-300 shadow-sm px-4 
+    <header className="bg-slate-200 border-b border-slate-300 shadow-sm px-4  fixed top-0 left-0 right-0 h-16 z-50
      md:px-6 flex items-center justify-between">
 
       {/* Left */}

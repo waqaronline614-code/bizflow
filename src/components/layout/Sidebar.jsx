@@ -15,15 +15,15 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
   return (
     <aside
             className={`
-            fixed top-0 left-0 z-50
-            w-64  bg-slate-900 text-slate-300 flex flex-col
+            fixed top-16 left-0 z-40
+            w-64 h-[calc(100vh-4rem)] bg-slate-900 text-slate-300 flex flex-col
             transform transition-transform duration-300
           ${
               isSidebarOpen
              ? "translate-x-0"
              : "-translate-x-full"
              }
-              lg:translate-x-0 lg:static`}>
+              lg:translate-x-0`}>
 
 
       {/* Logo */}
