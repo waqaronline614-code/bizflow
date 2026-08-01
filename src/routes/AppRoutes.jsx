@@ -3,6 +3,7 @@ import Dashboard from '../pages/Dashboard'
 import Login from '../pages/Login'
 import NotFound from '../pages/NotFound'
 import DashboardLayout from '../layouts/DashboardLayout'
+import Customers from '../pages/Customers'
 
 function AppRoutes()
 {
@@ -11,7 +12,8 @@ function AppRoutes()
            <Route path="/" element={<Navigate to="/login" replace />} />
            <Route path="/login" element={<Login />} />
             <Route element={<DashboardLayout/>}>
-            <Route path="/Dashboard" element={<Dashboard/>} />  
+            <Route path="/dashboard" element={<Dashboard/>} />  
+            <Route path="/customers" element={<Customers/>}/>
             </Route>
            <Route path="*" element={<NotFound/>} />
         </Routes>

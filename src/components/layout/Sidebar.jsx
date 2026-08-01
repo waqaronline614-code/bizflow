@@ -11,6 +11,8 @@ import {
   FiX
 } from "react-icons/fi";
 
+import { NavLink } from "react-router-dom";
+
 function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
   return (
     <aside
@@ -46,16 +48,20 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
         <p className="px-6 mb-3 text-xs uppercase tracking-widest text-slate-500">
           Main
         </p>
+          
+          <NavLink to='/dashboard' end className= {({isActive})=> `${isActive ? "bg-blue-600" :" hover:bg-slate-800"} mx-3 mb-1 flex
+           items-center gap-3 rounded-lg px-4 py-3 text-white cursor-pointer`} >
+               <FiHome size={20} />
+               <span>Dashboard</span>
+          </NavLink>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 bg-blue-600 text-white cursor-pointer">
-          <FiHome size={20} />
-          <span>Dashboard</span>
-        </div>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
+        <NavLink to='/customers' className={({isActive})=>`mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" :" hover:bg-slate-800"}
+        `}>
           <FiUsers size={20} />
           <span>Customers</span>
-        </div>
+        </NavLink>
 
         <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
           <FiBox size={20} />

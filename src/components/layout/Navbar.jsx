@@ -5,9 +5,23 @@ import {
   FiMenu,
 } from "react-icons/fi";
 
+import { useLocation } from "react-router-dom";
+
 function Navbar({setIsSidebarOpen}) {
+
+  const location   = useLocation()
+  const pageTitles = {
+                        "/dashboard": "Dashboard",
+                        "/customers": "Customers",
+                        "/products": "Products",
+                        "/orders": "Orders",
+                      };
+         
+  const currentPage = pageTitles[location.pathname] || "Dashboard";                   
+
   return (
-    <header className="bg-slate-200 border-b border-slate-300 shadow-sm px-4  fixed top-0 left-0 right-0 h-16 z-50
+    <header className="bg-slate-200 border-b border-slate-300 shadow-sm px-4  fixed top-0 left-0 right-0 h-16 
+     z-50
      md:px-6 flex items-center justify-between">
 
       {/* Left */}
@@ -20,7 +34,7 @@ function Navbar({setIsSidebarOpen}) {
 
         {/* Page Title */}
         <h2 className="hidden md:block text-2xl font-semibold text-blue-600">
-          Dashboard
+          {currentPage}
         </h2>
 
       </div>

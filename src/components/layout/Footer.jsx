@@ -1,7 +1,7 @@
 function Footer() {
   return (
     <footer className="mt-4 border-t border-black py-4">
-      <div className="flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
+      <div className="flex flex-col md:flex-row  items-center justify-between text-sm text-slate-500">
 
         <p>
           © {new Date().getFullYear()} <span className="font-semibold">BizFlow</span>. All rights reserved.
