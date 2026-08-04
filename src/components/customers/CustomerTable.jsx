@@ -1,38 +1,12 @@
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import Pagination from "../common/Pagination";
+import { useState } from "react";
 
-const customers = [
-  {
-    id: 1,
-    name: "Ali Khan",
-    phone: "+92 300 1234567",
-    email: "ali@gmail.com",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Ahmad Ali",
-    phone: "+92 301 9876543",
-    email: "ahmad@gmail.com",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Waqar Shah",
-    phone: "+92 333 1122334",
-    email: "waqar@gmail.com",
-    status: "Inactive",
-  },
-  {
-    id: 4,
-    name: "Bilal Khan",
-    phone: "+92 345 9988776",
-    email: "bilal@gmail.com",
-    status: "Active",
-  },
-];
 
-function CustomerTable() {
+
+function CustomerTable({customers}) {
+
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 

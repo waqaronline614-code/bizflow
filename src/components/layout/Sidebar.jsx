@@ -17,7 +17,7 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
   return (
     <aside
             className={`
-            fixed top-16 left-0 z-40
+            fixed top-16 left-0 z-50
             w-64 h-[calc(100vh-4rem)] bg-slate-900 text-slate-300 flex flex-col
             transform transition-transform duration-300
           ${
@@ -49,14 +49,16 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
           Main
         </p>
           
-          <NavLink to='/dashboard' end className= {({isActive})=> `${isActive ? "bg-blue-600" :" hover:bg-slate-800"} mx-3 mb-1 flex
+          <NavLink to='/dashboard' end  onClick={() => setIsSidebarOpen(false)}
+           className= {({isActive})=> `${isActive ? "bg-blue-600" :" hover:bg-slate-800"} mx-3 mb-1 flex
            items-center gap-3 rounded-lg px-4 py-3 text-white cursor-pointer`} >
                <FiHome size={20} />
                <span>Dashboard</span>
           </NavLink>
 
 
-        <NavLink to='/customers' className={({isActive})=>`mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+        <NavLink to='/customers'   onClick={() => setIsSidebarOpen(false)}
+         className={({isActive})=>`mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
             ${isActive ? "bg-blue-600" :" hover:bg-slate-800"}
         `}>
           <FiUsers size={20} />
