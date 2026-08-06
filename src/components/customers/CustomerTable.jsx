@@ -1,12 +1,16 @@
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import Pagination from "../common/Pagination";
-import { useState } from "react";
 
-
-
-function CustomerTable({customers}) {
-
-
+function CustomerTable({
+  customers,
+  onEditCustomer,
+  onDeleteCustomer,
+  currentPage,
+  totalPages,
+  totalCustomers,
+  customersPerPage,
+  onPageChange,
+}) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
@@ -48,8 +52,6 @@ function CustomerTable({customers}) {
 
         <table className="w-full">
 
-          {/* Header */}
-
           <thead className="bg-slate-50 border-b border-slate-200">
 
             <tr>
@@ -78,82 +80,97 @@ function CustomerTable({customers}) {
 
           </thead>
 
-          {/* Body */}
-
           <tbody>
 
-            {customers.map((customer) => (
+            {customers.length === 0 ? (
+              <tr>
 
-              <tr
-                key={customer.id}
-                className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-200"
-              >
-
-                <td className="px-6 py-4 font-medium text-slate-800">
-                  {customer.name}
-                </td>
-
-                <td className="px-6 py-4 text-slate-600">
-                  {customer.phone}
-                </td>
-
-                <td className="px-6 py-4 text-slate-600">
-                  {customer.email}
-                </td>
-
-                <td className="px-6 py-4 text-center">
-
-                  <span
-                    className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${
-                      customer.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {customer.status}
-                  </span>
-
-                </td>
-
-                <td className="px-6 py-4">
-
-                  <div className="flex justify-center items-center gap-2">
-
-                    <button
-                      className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
-                      title="View"
-                    >
-                      <FiEye size={18} />
-                    </button>
-
-                    <button
-                      className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
-                      title="Edit"
-                    >
-                      <FiEdit2 size={18} />
-                    </button>
-
-                    <button
-                      className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
-                      title="Delete"
-                    >
-                      <FiTrash2 size={18} />
-                    </button>
-
-                  </div>
-
+                <td
+                  colSpan="5"
+                  className="text-center py-12 text-slate-500"
+                >
+                  No customers added yet.
                 </td>
 
               </tr>
+            ) : (
+              customers.map((customer) => (
+                <tr
+                  key={customer.id}
+                  className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-200"
+                >
 
-            ))}
+                  <td className="px-6 py-4 font-medium text-slate-800">
+                    {customer.fullName}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-600">
+                    {customer.phone}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-600">
+                    {customer.email}
+                  </td>
+
+                  <td className="px-6 py-4 text-center">
+
+                    <span
+                      className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${customer.status === "Active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                        }`}
+                    >
+                      {customer.status}
+                    </span>
+
+                  </td>
+
+                  <td className="px-6 py-4">
+
+                    <div className="flex justify-center items-center gap-2">
+
+                      <button
+                        className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+                      >
+                        <FiEye size={18} />
+                      </button>
+
+                      <button
+                        onClick={() => onEditCustomer(customer)}
+                        className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+                      >
+                        <FiEdit2 size={18} />
+                      </button>
+
+                      <button
+                        onClick={() => onDeleteCustomer(customer)}
+                        className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+              ))
+            )}
 
           </tbody>
 
         </table>
 
       </div>
-              <Pagination/>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCustomers={totalCustomers}
+        customersPerPage={customersPerPage}
+        onPageChange={onPageChange}
+      />
+
     </div>
   );
 }

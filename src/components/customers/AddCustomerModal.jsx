@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
+function AddCustomerModal({ isOpen, onClose, onAddCustomer, editingCustomer, isEditMode }) {
+
+
   const {
     register,
     handleSubmit,
@@ -8,21 +11,37 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
     formState: { errors },
   } = useForm();
 
+  useEffect(() => {
+    if (isEditMode && editingCustomer) {
+      reset(editingCustomer);
+    }
+    else {
+      reset({
+        fullName: "",
+        phone: "",
+        email: "",
+        address: "",
+        status: "",
+      });
+    }
+  }, [editingCustomer, isEditMode, reset]);
+
   if (!isOpen) return null;
 
   const onSubmit = (data) => {
     onAddCustomer({
-      name:     data.fullName,
-      phone:    data.phone,
-      email :   data.email,
-      address : data.address,
-      status :  data.status
+      fullName: data.fullName,
+      phone: data.phone,
+      email: data.email,
+      address: data.address,
+      status: data.status
     });
 
     reset();
     onClose();
   };
- 
+
+
   return (
     <div
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
@@ -36,7 +55,9 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
 
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200">
           <h2 className="text-xl font-semibold text-slate-800">
-            Add Customer
+            {
+              isEditMode ? "Edit Customer" : "Add Customer"
+            }
           </h2>
 
           <button
@@ -64,11 +85,10 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
               type="text"
               placeholder="Enter customer name"
               className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-              ${
-                errors.fullName
+              ${errors.fullName
                   ? "border-red-500 focus:ring-red-500"
                   : "border-slate-300 focus:ring-blue-500"
-              }`}
+                }`}
               {...register("fullName", {
                 required: "Full name is required",
                 minLength: {
@@ -96,11 +116,10 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
               type="text"
               placeholder="+92 300 1234567"
               className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-              ${
-                errors.phone
+              ${errors.phone
                   ? "border-red-500 focus:ring-red-500"
                   : "border-slate-300 focus:ring-blue-500"
-              }`}
+                }`}
               {...register("phone", {
                 required: "Phone number is required",
                 pattern: {
@@ -128,11 +147,10 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
               type="email"
               placeholder="customer@gmail.com"
               className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-              ${
-                errors.email
+              ${errors.email
                   ? "border-red-500 focus:ring-red-500"
                   : "border-slate-300 focus:ring-blue-500"
-              }`}
+                }`}
               {...register("email", {
                 required: "Email is required",
                 pattern: {
@@ -160,11 +178,10 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
               rows="3"
               placeholder="Enter address"
               className={`w-full px-4 py-3 rounded-xl border resize-none focus:outline-none focus:ring-2
-              ${
-                errors.address
+              ${errors.address
                   ? "border-red-500 focus:ring-red-500"
                   : "border-slate-300 focus:ring-blue-500"
-              }`}
+                }`}
               {...register("address", {
                 required: "Address is required",
               })}
@@ -186,11 +203,10 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
 
             <select
               className={`w-full px-4 py-3 rounded-xl border bg-white focus:outline-none focus:ring-2
-              ${
-                errors.status
+              ${errors.status
                   ? "border-red-500 focus:ring-red-500"
                   : "border-slate-300 focus:ring-blue-500"
-              }`}
+                }`}
               {...register("status", {
                 required: "Status is required",
               })}
@@ -222,7 +238,7 @@ function AddCustomerModal({ isOpen, onClose, onAddCustomer }) {
               type="submit"
               className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition"
             >
-              Save Customer
+              {isEditMode ? "Update Customer" : "Save Customer"}
             </button>
           </div>
         </form>
