@@ -116,8 +116,8 @@ function CustomerTable({
 
                     <span
                       className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${customer.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
                         }`}
                     >
                       {customer.status}
@@ -166,8 +166,9 @@ function CustomerTable({
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        totalCustomers={totalCustomers}
-        customersPerPage={customersPerPage}
+        totalItems={totalCustomers}
+        itemsPerPage={customersPerPage}
+        itemName="customers"
         onPageChange={onPageChange}
       />
 

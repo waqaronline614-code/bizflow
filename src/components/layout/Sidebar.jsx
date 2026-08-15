@@ -13,18 +13,17 @@ import {
 
 import { NavLink } from "react-router-dom";
 
-function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
+function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   return (
     <aside
-            className={`
+      className={`
             fixed top-16 left-0 z-50
             w-64 h-[calc(100vh-4rem)] bg-slate-900 text-slate-300 flex flex-col
             transform transition-transform duration-300
-          ${
-              isSidebarOpen
-             ? "translate-x-0"
-             : "-translate-x-full"
-             }
+          ${isSidebarOpen
+          ? "translate-x-0"
+          : "-translate-x-full"
+        }
               lg:translate-x-0`}>
 
 
@@ -34,10 +33,10 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
           <span className="text-blue-500">Biz</span>
           <span className="text-white">Flow</span>
         </h1>
-         <button className=" md:hidden text-white text-2xl hover:text-blue-400"
-         onClick={()=>setIsSidebarOpen(false)}
-         >
-               <FiX />
+        <button className=" md:hidden text-white text-2xl hover:text-blue-400"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <FiX />
         </button>
       </div>
 
@@ -48,27 +47,30 @@ function Sidebar({isSidebarOpen,setIsSidebarOpen}) {
         <p className="px-6 mb-3 text-xs uppercase tracking-widest text-slate-500">
           Main
         </p>
-          
-          <NavLink to='/dashboard' end  onClick={() => setIsSidebarOpen(false)}
-           className= {({isActive})=> `${isActive ? "bg-blue-600" :" hover:bg-slate-800"} mx-3 mb-1 flex
+
+        <NavLink to='/dashboard' end onClick={() => setIsSidebarOpen(false)}
+          className={({ isActive }) => `${isActive ? "bg-blue-600" : " hover:bg-slate-800"} mx-3 mb-1 flex
            items-center gap-3 rounded-lg px-4 py-3 text-white cursor-pointer`} >
-               <FiHome size={20} />
-               <span>Dashboard</span>
-          </NavLink>
+          <FiHome size={20} />
+          <span>Dashboard</span>
+        </NavLink>
 
 
-        <NavLink to='/customers'   onClick={() => setIsSidebarOpen(false)}
-         className={({isActive})=>`mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
-            ${isActive ? "bg-blue-600" :" hover:bg-slate-800"}
+        <NavLink to='/customers' onClick={() => setIsSidebarOpen(false)}
+          className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
         `}>
           <FiUsers size={20} />
           <span>Customers</span>
         </NavLink>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
+        <NavLink to='/products' onClick={() => setIsSidebarOpen(false)}
+          className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
+        `}>
           <FiBox size={20} />
           <span>Products</span>
-        </div>
+        </NavLink>
 
         <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
           <FiTruck size={20} />

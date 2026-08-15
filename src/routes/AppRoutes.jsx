@@ -4,6 +4,7 @@ import Login from '../pages/Login'
 import NotFound from '../pages/NotFound'
 import DashboardLayout from '../layouts/DashboardLayout'
 import Customers from '../pages/Customers'
+import Products from "../pages/products";
 
 function AppRoutes()
 {
@@ -14,6 +15,8 @@ function AppRoutes()
             <Route element={<DashboardLayout/>}>
             <Route path="/dashboard" element={<Dashboard/>} />  
             <Route path="/customers" element={<Customers/>}/>
+            <Route path="/products" element={<Products/>}/>
+
             </Route>
            <Route path="*" element={<NotFound/>} />
         </Routes>
