@@ -72,10 +72,13 @@ function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
           <span>Products</span>
         </NavLink>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
+        <NavLink to='/suppliers' onClick={() => setIsSidebarOpen(false)}
+          className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
+        `}>
           <FiTruck size={20} />
           <span>Suppliers</span>
-        </div>
+        </NavLink>
 
         {/* MANAGEMENT */}
 

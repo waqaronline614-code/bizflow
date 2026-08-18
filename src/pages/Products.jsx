@@ -54,7 +54,7 @@ function Products() {
 
   // Delete
 
-  const handleDelete = (product) => {
+  const handleDelete = (product) => { 
     setProductToDelete(product);
     setIsDeleteModalOpen(true);
   };
@@ -108,7 +108,7 @@ function Products() {
           ...productData,
         },
         ...prev,
-      ]);
+       ]);
 
       setCurrentPage(1);
     }
@@ -148,7 +148,7 @@ function Products() {
         totalProducts={products.length}
         productsPerPage={productsPerPage}
         onPageChange={setCurrentPage}
-      />
+      /> 
 
       <AddProductModal
         isOpen={isModalOpen}

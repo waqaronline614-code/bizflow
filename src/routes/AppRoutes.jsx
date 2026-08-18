@@ -5,6 +5,7 @@ import NotFound from '../pages/NotFound'
 import DashboardLayout from '../layouts/DashboardLayout'
 import Customers from '../pages/Customers'
 import Products from "../pages/products";
+import Suppliers from "../pages/Suppliers";
 
 function AppRoutes()
 {
@@ -16,7 +17,7 @@ function AppRoutes()
             <Route path="/dashboard" element={<Dashboard/>} />  
             <Route path="/customers" element={<Customers/>}/>
             <Route path="/products" element={<Products/>}/>
-
+            <Route path="/suppliers" element={<Suppliers/>}/>
             </Route>
            <Route path="*" element={<NotFound/>} />
         </Routes>

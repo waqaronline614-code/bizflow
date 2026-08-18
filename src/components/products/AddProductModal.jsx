@@ -49,10 +49,8 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
 
 
     return (
-        <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
-            onClick={onClose}
-        >
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+            onClick={onClose}>
             <div
                 className="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-xl flex flex-col overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
@@ -120,7 +118,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
 
                         <input
                             type="text"
-                            placeholder="Category is required"
+                            placeholder="Enter category"
                             className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
               ${errors.category
                                     ? "border-red-500 focus:ring-red-500"
@@ -151,7 +149,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
 
                         <input
                             type="text"
-                            placeholder="Supplier is required"
+                            placeholder="Supplier is name"
                             className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
               ${errors.supplier
                                     ? "border-red-500 focus:ring-red-500"
@@ -194,7 +192,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                                     value: 0,
                                     message: "Price cannot be negative",
                                 },
-                            })}
+                              })}
                         />
 
                         {errors.purchasePrice && (

@@ -15,6 +15,7 @@ function Navbar({setIsSidebarOpen}) {
                         "/customers": "Customers",
                         "/products": "Products",
                         "/orders": "Orders",
+                        "/suppliers" :"Suppliers",
                       };
          
   const currentPage = pageTitles[location.pathname] || "Dashboard";                   
