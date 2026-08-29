@@ -1,61 +1,62 @@
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import Pagination from "../common/Pagination";
 
-
-
-function SupplierTable({ suppliers, onEditSupplier, onDeleteSupplier,  currentPage,
+function SupplierTable({
+    suppliers,
+    onEditSupplier,
+    onDeleteSupplier,
+    currentPage,
     totalPages,
     totalSuppliers,
     suppliersPerPage,
-    onPageChange, }) {
+    onPageChange,
+}) {
     return (
-        <div className="bg-white rounded-2xl border
-         border-slate-200 shadow-sm overflow-hidden">
-            {/* Table */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
+            {/* Table */}
             <div className="overflow-x-auto">
 
-                <table className="w-full">
+                <table className="w-full min-w-[750px]">
 
+                    {/* Header */}
                     <thead className="bg-slate-50 border-b border-slate-200">
-
                         <tr>
 
-                            <th className="px-2 py-4 text-left text-sm font-semibold text-slate-700">
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">
                                 Supplier Name
                             </th>
 
-                            <th className="px-2 py-4 text-left text-sm font-semibold text-slate-700">
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">
                                 Contact Person
                             </th>
 
-                            <th className="px-2 py-4 text-center text-sm font-semibold text-slate-700">
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
                                 Phone
                             </th>
 
-                            <th className="px-2 py-4 text-center text-sm font-semibold text-slate-700">
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
                                 Address
                             </th>
 
-                            <th className="px-2 py-4 text-center text-sm font-semibold text-slate-700">
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
                                 Actions
                             </th>
-                        </tr>
 
+                        </tr>
                     </thead>
 
+                    {/* Body */}
                     <tbody>
 
                         {suppliers.length === 0 ? (
                             <tr>
-
                                 <td
-                                    colSpan="8"
-                                    className="text-center py-12 text-slate-500"
+                                    colSpan="5"
+                                    className="py-10 text-center text-sm text-slate-500"
                                 >
                                     No Suppliers added yet.
                                 </td>
-
                             </tr>
                         ) : (
                             suppliers.map((supplier) => (
@@ -64,47 +65,58 @@ function SupplierTable({ suppliers, onEditSupplier, onDeleteSupplier,  currentPa
                                     className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-200"
                                 >
 
-                                    <td className="px-2 py-4 font-medium text-slate-800">
+                                    {/* Supplier Name */}
+                                    <td className="px-4 py-3 text-sm font-medium text-slate-800 whitespace-nowrap">
                                         {supplier.supplierName}
                                     </td>
 
-                                    <td className="px-2 py-4 text-slate-600">
+                                    {/* Contact Person */}
+                                    <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
                                         {supplier.contactPerson}
                                     </td>
 
-                                    <td className="px-2 py-4 text-slate-600">
+                                    {/* Phone */}
+                                    <td className="px-3 py-3 text-center text-sm text-slate-600 whitespace-nowrap">
                                         {supplier.phone}
                                     </td>
-                                    <td className="px-2 py-4 text-slate-600">
+
+                                    {/* Address */}
+                                    <td className="px-3 py-3 text-center text-sm text-slate-600 whitespace-nowrap">
                                         {supplier.address}
                                     </td>
-                                    <td className="px-2 py-4">
 
-                                        <div className="flex justify-center items-center gap-2">
+                                    {/* Actions */}
+                                    <td className="px-3 py-3">
+                                        <div className="flex justify-center items-center gap-1">
 
+                                            {/* View */}
                                             <button
-                                                className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+                                                className="p-1.5 rounded-lg hover:bg-blue-100 text-blue-600 transition"
                                             >
-                                                <FiEye size={18} />
+                                                <FiEye size={16} />
                                             </button>
 
+                                            {/* Edit */}
                                             <button
-
-                                                className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
-                                                onClick={() => onEditSupplier(supplier)}
+                                                onClick={() =>
+                                                    onEditSupplier(supplier)
+                                                }
+                                                className="p-1.5 rounded-lg hover:bg-green-100 text-green-600 transition"
                                             >
-                                                <FiEdit2 size={18} />
+                                                <FiEdit2 size={16} />
                                             </button>
 
+                                            {/* Delete */}
                                             <button
-                                                className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
-                                                onClick={() => onDeleteSupplier(supplier)}
+                                                onClick={() =>
+                                                    onDeleteSupplier(supplier)
+                                                }
+                                                className="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition"
                                             >
-                                                <FiTrash2 size={18} />
+                                                <FiTrash2 size={16} />
                                             </button>
 
                                         </div>
-
                                     </td>
 
                                 </tr>
@@ -116,6 +128,8 @@ function SupplierTable({ suppliers, onEditSupplier, onDeleteSupplier,  currentPa
                 </table>
 
             </div>
+
+            {/* Pagination */}
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -124,9 +138,9 @@ function SupplierTable({ suppliers, onEditSupplier, onDeleteSupplier,  currentPa
                 itemName="suppliers"
                 onPageChange={onPageChange}
             />
-        </div>
-    )
-}
 
+        </div>
+    );
+}
 
 export default SupplierTable;

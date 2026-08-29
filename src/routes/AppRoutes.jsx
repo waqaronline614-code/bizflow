@@ -6,6 +6,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import Customers from '../pages/Customers'
 import Products from "../pages/products";
 import Suppliers from "../pages/Suppliers";
+import Purchases from "../pages/Purchases";
 
 function AppRoutes()
 {
@@ -18,6 +19,7 @@ function AppRoutes()
             <Route path="/customers" element={<Customers/>}/>
             <Route path="/products" element={<Products/>}/>
             <Route path="/suppliers" element={<Suppliers/>}/>
+            <Route path="/purchases" element={<Purchases/>}/>
             </Route>
            <Route path="*" element={<NotFound/>} />
         </Routes>

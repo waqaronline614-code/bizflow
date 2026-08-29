@@ -31,7 +31,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
     if (!isOpen) return null;
 
     const onSubmit = (data) => {
-        const stock = Number(data.stock);
+     
 
         onAddProduct({
             productName: data.productName,
@@ -39,8 +39,8 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
             supplier: data.supplier,
             purchasePrice: Number(data.purchasePrice),
             sellingPrice: Number(data.sellingPrice),
-            stock,
-            status: stock > 0 ? "In Stock" : "Out of Stock",
+            unit: data.unit
+          
         });
 
         reset();
@@ -140,9 +140,9 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                         )}
                     </div>
 
-                    {/*Supplier*/}
-
-                    <div>
+                    {/*Supplier
+                        
+                        <div>
                         <label className="block mb-2 text-sm font-medium text-slate-700">
                             Supplier
                         </label>
@@ -170,6 +170,11 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                             </p>
                         )}
                     </div>
+                        
+                        
+                        */}
+
+
 
                     {/*purchasePrice*/}
 
@@ -192,7 +197,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                                     value: 0,
                                     message: "Price cannot be negative",
                                 },
-                              })}
+                            })}
                         />
 
                         {errors.purchasePrice && (
@@ -232,33 +237,36 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                         )}
                     </div>
 
-                    {/*Stock*/}
+                    {/*unit*/}
 
                     <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">
-                            Stock
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Unit
                         </label>
 
-                        <input
-                            type="number"
-                            placeholder="Enter Stock"
-                            className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-              ${errors.stock
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "border-slate-300 focus:ring-blue-500"
-                                }`}
-                            {...register("stock", {
-                                required: "Stock is required",
-                                min: {
-                                    value: 0,
-                                    message: "Stock cannot be negative",
-                                },
+                        <select
+                            {...register("unit", {
+                                required: "Unit is required",
                             })}
-                        />
+                            className="w-full h-11 px-4 rounded-xl border border-slate-300
+               bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">Select Unit</option>
+                            <option value="PC">PC</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Gram">Gram</option>
+                            <option value="Liter">Liter</option>
+                            <option value="Meter">Meter</option>
+                            <option value="Box">Box</option>
+                            <option value="Pack">Pack</option>
+                            <option value="Dozen">Dozen</option>
+                            <option value="Pair">Pair</option>
+                            <option value="Set">Set</option>
+                        </select>
 
-                        {errors.stock && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.stock.message}
+                        {errors.unit && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.unit.message}
                             </p>
                         )}
                     </div>

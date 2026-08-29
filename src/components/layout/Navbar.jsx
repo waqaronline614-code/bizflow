@@ -7,18 +7,19 @@ import {
 
 import { useLocation } from "react-router-dom";
 
-function Navbar({setIsSidebarOpen}) {
+function Navbar({ setIsSidebarOpen }) {
 
-  const location   = useLocation()
+  const location = useLocation()
   const pageTitles = {
-                        "/dashboard": "Dashboard",
-                        "/customers": "Customers",
-                        "/products": "Products",
-                        "/orders": "Orders",
-                        "/suppliers" :"Suppliers",
-                      };
-         
-  const currentPage = pageTitles[location.pathname] || "Dashboard";                   
+    "/dashboard": "Dashboard",
+    "/customers": "Customers",
+    "/products": "Products",
+    "/orders": "Orders",
+    "/suppliers": "Suppliers",
+    "/purchases": 'Purchases'
+  };
+
+  const currentPage = pageTitles[location.pathname] || "Dashboard";
 
   return (
     <header className="bg-slate-200 border-b border-slate-300 shadow-sm px-4  fixed top-0 left-0 right-0 h-16 

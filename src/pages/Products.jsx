@@ -8,15 +8,14 @@ import DeleteModal from "../components/common/DeleteModal";
 function Products() {
  const initialProducts = [
   {
-    id: 1,
-    productName: "Dell Mouse",
-    category: "Accessories",
-    supplier: "ABC Traders",
-    purchasePrice: 1200,
-    sellingPrice: 1600,
-    stock: 45,
-    status: "In Stock",
-  },
+  id: 1,
+  productName: "Charger",
+  category: "Accessories",
+  unit: "Piece",
+  purchasePrice: 500,
+  sellingPrice: 700,
+  stock: 0
+},
 ];
 
   const [products, setProducts] = useState(initialProducts);
