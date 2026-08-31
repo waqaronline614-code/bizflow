@@ -140,42 +140,6 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                         )}
                     </div>
 
-                    {/*Supplier
-                        
-                        <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">
-                            Supplier
-                        </label>
-
-                        <input
-                            type="text"
-                            placeholder="Supplier is name"
-                            className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-              ${errors.supplier
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "border-slate-300 focus:ring-blue-500"
-                                }`}
-                            {...register("supplier", {
-                                required: "supplier is required",
-                                minLength: {
-                                    value: 3,
-                                    message: "Minimum 3 characters",
-                                },
-                            })}
-                        />
-
-                        {errors.supplier && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.supplier.message}
-                            </p>
-                        )}
-                    </div>
-                        
-                        
-                        */}
-
-
-
                     {/*purchasePrice*/}
 
                     <div>
@@ -252,7 +216,7 @@ function AddProductModal({ isOpen, onClose, onAddProduct, editingProduct, isEdit
                bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select Unit</option>
-                            <option value="PC">PC</option>
+                            <option value="pc">pc</option>
                             <option value="Kg">Kg</option>
                             <option value="Gram">Gram</option>
                             <option value="Liter">Liter</option>

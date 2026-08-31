@@ -1,24 +1,21 @@
 import { FiPlus } from "react-icons/fi";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import ProductTable from "../components/products/ProductTable";
 import AddProductModal from "../components/products/AddProductModal";
 import DeleteModal from "../components/common/DeleteModal";
 
-function Products() {
- const initialProducts = [
-  {
-  id: 1,
-  productName: "Charger",
-  category: "Accessories",
-  unit: "Piece",
-  purchasePrice: 500,
-  sellingPrice: 700,
-  stock: 0
-},
-];
+import {
+  addProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+} from "../services/productService";
 
-  const [products, setProducts] = useState(initialProducts);
+function Products() {
+  const [products, setProducts] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -29,13 +26,31 @@ function Products() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [productToDelete, setProductToDelete] = useState(null);
-  
+
+  // --------------------------------
+  // Load products from Firestore on mount
+  // --------------------------------
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Pagination
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const productsPerPage = 3;
+  const productsPerPage = 6;
 
   const totalPages = Math.ceil(
     products.length / productsPerPage
@@ -53,23 +68,28 @@ function Products() {
 
   // Delete
 
-  const handleDelete = (product) => { 
+  const handleDelete = (product) => {
     setProductToDelete(product);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteProduct = () => {
-    setProducts((prev) =>
-      prev.filter(
-        (product) =>product.id !== productToDelete.id
-      )
-    );
+  const confirmDeleteProduct = async () => {
+    try {
+      await deleteProduct(productToDelete.id);
 
-    setCurrentPage(1);
+      setProducts((prev) =>
+        prev.filter(
+          (product) => product.id !== productToDelete.id
+        )
+      );
 
-    setProductToDelete(null);
-
-    setIsDeleteModalOpen(false);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    } finally {
+      setProductToDelete(null);
+      setIsDeleteModalOpen(false);
+    }
   };
 
   // Edit
@@ -84,35 +104,43 @@ function Products() {
 
   // Save
 
-  const saveProduct = (productData) => {
-    if (isEditMode) {
-      setProducts((prev) =>
-        prev.map((product) =>
-          product.id === editingProduct.id
-            ? {
-              ...product,
-              ...productData,
-            }
-            : product
-        )
-      );
+  const saveProduct = async (productData) => {
+    try {
+      if (isEditMode) {
+        await updateProduct(editingProduct.id, productData);
 
-      setIsEditMode(false);
+        setProducts((prev) =>
+          prev.map((product) =>
+            product.id === editingProduct.id
+              ? {
+                ...product,
+                ...productData,
+              }
+              : product
+          )
+        );
 
-      setEditingProduct(null);
-    } else {
-      setProducts((prev) => [
-        {
-          id: Date.now(),
-          ...productData,
-        },
-        ...prev,
-       ]);
+        setIsEditMode(false);
 
-      setCurrentPage(1);
+        setEditingProduct(null);
+      } else {
+        const newId = await addProduct(productData);
+
+        setProducts((prev) => [
+          {
+            id: newId,
+            ...productData,
+          },
+          ...prev,
+        ]);
+
+        setCurrentPage(1);
+      }
+    } catch (error) {
+      console.error("Failed to save product:", error);
+    } finally {
+      setIsModalOpen(false);
     }
-
-    setIsModalOpen(false);
   };
 
   return (
@@ -138,16 +166,20 @@ function Products() {
         </button>
       </div>
 
-      <ProductTable
-        products={paginatedProducts}
-        onEditProduct={handleEditProduct}
-        onDeleteProduct={handleDelete}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalProducts={products.length}
-        productsPerPage={productsPerPage}
-        onPageChange={setCurrentPage}
-      /> 
+      {isLoading ? (
+        <p className="text-red-500 flex justify-center">Loading products...</p>
+      ) : (
+        <ProductTable
+          products={paginatedProducts}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDelete}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalProducts={products.length}
+          productsPerPage={productsPerPage}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       <AddProductModal
         isOpen={isModalOpen}

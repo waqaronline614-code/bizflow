@@ -1,23 +1,20 @@
 import { FiPlus } from "react-icons/fi";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import CustomerTable from "../components/customers/CustomerTable";
 import AddCustomerModal from "../components/customers/AddCustomerModal";
 import DeleteModal from "../components/common/DeleteModal";
+import {
+  addCustomer,
+  getCustomers,
+  updateCustomer,
+  deleteCustomer,
+} from "../services/customerService";
 
 function Customers() {
-  const initialCustomers = [
-    {
-      id: 1,
-      fullName: "Ali Khan",
-      phone: "+92 300 1234567",
-      email: "ali@gmail.com",
-      address: "Peshawar",
-      status: "Active",
-    },
-  ];
 
-  const [customers, setCustomers] = useState(initialCustomers);
+
+  const [customers, setCustomers] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -28,12 +25,13 @@ function Customers() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [isLoading, setIsLoading] = useState(true)
 
   // Pagination
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const customersPerPage = 3;
+  const customersPerPage = 6;
 
   const totalPages = Math.ceil(
     customers.length / customersPerPage
@@ -48,7 +46,28 @@ function Customers() {
       startIndex + customersPerPage
     );
   }, [customers, currentPage]);
+  // fetch customer
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
 
+        setIsLoading(true);
+        const data = await getCustomers()
+        setCustomers(data)
+
+      }
+      catch (error) {
+        console.error("Failed to fetch customer:", error)
+        setCustomers([])
+      }
+      finally {
+        setIsLoading(false)
+      }
+
+    }
+
+    fetchCustomer();
+  }, [])
   // Delete
 
   const handleDelete = (customer) => {
@@ -56,18 +75,34 @@ function Customers() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteCustomer = () => {
-    setCustomers((prev) =>
-      prev.filter(
-        (customer) => customer.id !== customerToDelete.id
-      )
-    );
+  const confirmDeleteCustomer = async () => {
 
-    setCurrentPage(1);
+    if (!customerToDelete?.id) {
+      return;
+    }
+    try {
+      await deleteCustomer(customerToDelete.id)
+      setCustomers((prev) =>
+        prev.filter(
+          (customer) => customer.id !== customerToDelete.id
+        )
+      );
 
-    setCustomerToDelete(null);
+      setCurrentPage(1);
 
-    setIsDeleteModalOpen(false);
+      setCustomerToDelete(null);
+    }
+    catch (error) {
+      console.error(
+        "Failed to delete supplier:",
+        error
+      );
+    }
+    finally {
+
+      setIsDeleteModalOpen(false);
+    }
+
   };
 
   // Edit
@@ -82,35 +117,44 @@ function Customers() {
 
   // Save
 
-  const saveCustomer = (customerData) => {
-    if (isEditMode) {
-      setCustomers((prev) =>
-        prev.map((customer) =>
-          customer.id === editingCustomer.id
-            ? {
-              ...customer,
-              ...customerData,
-            }
-            : customer
-        )
-      );
+  const saveCustomer = async (customerData) => {
+    try {
+      if (isEditMode) {
+        await updateCustomer(editingCustomer.id, customerData)
+        setCustomers((prev) =>
+          prev.map((customer) =>
+            customer.id === editingCustomer.id
+              ? {
+                ...customer,
+                ...customerData,
+              }
+              : customer
+          )
+        );
 
-      setIsEditMode(false);
+        setIsEditMode(false);
 
-      setEditingCustomer(null);
-    } else {
-      setCustomers((prev) => [
-        {
-          id: Date.now(),
-          ...customerData,
-        },
-        ...prev,
-      ]);
+        setEditingCustomer(null);
+      } else {
+        const newId = await addCustomer(customerData)
+        setCustomers((prev) => [
+          {
+            id: newId,
+            ...customerData,
+          },
+          ...prev,
+        ]);
 
-      setCurrentPage(1);
+        setCurrentPage(1);
+      }
     }
+    catch (error) {
+      console.error("Failed to save customer:", error);
+    }
+    finally {
 
-    setIsModalOpen(false);
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -135,17 +179,22 @@ function Customers() {
           Add Customer
         </button>
       </div>
-
-      <CustomerTable
-        customers={paginatedCustomers}
-        onEditCustomer={handleEditCustomer}
-        onDeleteCustomer={handleDelete}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalCustomers={customers.length}
-        customersPerPage={customersPerPage}
-        onPageChange={setCurrentPage}
-      />
+      {
+        isLoading ? (
+          <p className="text-red-500 flex justify-center">Loading...</p>) :
+          (
+            <CustomerTable
+              customers={paginatedCustomers}
+              onEditCustomer={handleEditCustomer}
+              onDeleteCustomer={handleDelete}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCustomers={customers.length}
+              customersPerPage={customersPerPage}
+              onPageChange={setCurrentPage}
+            />
+          )
+      }
 
       <AddCustomerModal
         isOpen={isModalOpen}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiPlus } from "react-icons/fi";
 
 import AddPurchaseModal from "../components/purchases/AddPurchaseModal";
@@ -6,45 +6,33 @@ import PurchaseTable from "../components/purchases/PurchaseTable";
 import ViewPurchaseModal from "../components/purchases/ViewPurchaseModal";
 import DeleteModal from "../components/common/DeleteModal";
 
+import {
+    addPurchase,
+    getPurchase,
+    updatePurchase,
+    deletePurchase,
+} from "../services/purchaseService";
+import {getSuppliers, } from "../services/supplierService"
+import {getProducts } from "../services/productService"
+
+
 function Purchases() {
     // ==============================
     // Suppliers
     // ==============================
-    const [suppliers] = useState([
-        {
-            id: 1,
-            supplierName: "Tech World",
-        },
-        {
-            id: 2,
-            supplierName: "Mobile Hub",
-        },
-    ]);
+    const [suppliers , setSuppliers] = useState([]);
 
     // ==============================
     // Products
     // ==============================
-    const [products] = useState([
-        {
-            id: 1,
-            productName: "USB Cable",
-            unit: "Piece",
-            salePrice: 800,
-            purchasePrice: 500,
-        },
-        {
-            id: 2,
-            productName: "Bluetooth Speaker",
-            unit: "PC",
-            salePrice: 800,
-            purchasePrice: 300,
-        },
-    ]);
+    const [products, setProducts] = useState([]);
 
     // ==============================
     // Purchases
     // ==============================
     const [purchases, setPurchases] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // ==============================
     // Add Purchase Modal
@@ -62,22 +50,68 @@ function Purchases() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [purchaseToDelete, setPurchaseToDelete] = useState(null);
 
+     // ==============================
+    // Edit and update Purchase
     // ==============================
-    // Edit and update  Purchase
-    // ==============================
-    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingPurchase, setEditingPurchase] = useState(null);
-    // ==================================================
 
-    // Open Edit Purchase Modal 
+    // ==================================================
+    // Fetch Purchases From Firestore On Mount
+    // ==================================================
+    useEffect(() => {
+        const fetchPurchases = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getPurchase();
+                setPurchases(data);
+            } catch (err) {
+                console.error("Failed to fetch purchases:", err);
+                setError("Failed to load purchases. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        const fetchProducts = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getProducts();
+                setProducts(data);
+            } catch (err) {
+                console.error("Failed to fetch products:", err);
+                setError("Failed to load product. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        const fetchSuppliers = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getSuppliers();
+                setSuppliers(data);
+            } catch (err) {
+                console.error("Failed to fetch Suppliers:", err);
+                setError("Failed to load Suppliers. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchSuppliers();
+        fetchProducts();
+        fetchPurchases();
+    }, []);
+
+    // ==================================================
+    // Open Edit Purchase Modal
     // ==================================================
     const handleEdit = (purchaseData) => {
-        setEditingPurchase(purchaseData)
-        setIsModalOpen(true)
-        setIsEditOpen(true)
-    }
+        setEditingPurchase(purchaseData);
+        setIsModalOpen(true);
+        setIsEditOpen(true);
+    };
 
-    // Open Add Purchase Modal 
+    // ==================================================
+    // Open Add Purchase Modal
     // ==================================================
     const handleOpenAddModal = () => {
         setIsModalOpen(true);
@@ -88,38 +122,49 @@ function Purchases() {
     // ==================================================
     const handleCloseAddModal = () => {
         setIsModalOpen(false);
+        setEditingPurchase(null);
+        setIsEditOpen(false);
     };
 
     // ==================================================
-    // Save Purchase
+    // Save Purchase (Add or Update in Firestore)
     // ==================================================
-    const savePurchase = (purchaseData) => {
-       
-        if (isEditOpen) {
-            setPurchases((prev) => {
-              return prev.map((purchase) => purchase.id === editingPurchase.id ?
-                    {
-                        ...purchase, ...purchaseData
-                    } : purchase
-                )
-            })
-            setIsEditOpen(false)
-            setEditingPurchase(null)
+    const savePurchase = async (purchaseData) => {
+        try {
+            if (isEditOpen && editingPurchase) {
+                // Update existing purchase in Firestore
+                await updatePurchase(editingPurchase.id, purchaseData);
+
+                setPurchases((prev) =>
+                    prev.map((purchase) =>
+                        purchase.id === editingPurchase.id
+                            ? { ...purchase, ...purchaseData }
+                            : purchase
+                    )
+                );
+
+                setIsEditOpen(false);
+                setEditingPurchase(null);
+            } else {
+                // Add new purchase to Firestore
+                const newId = await addPurchase(purchaseData);
+
+                const newPurchase = {
+                    id: newId,
+                    ...purchaseData,
+                };
+
+                setPurchases((prevPurchases) => [
+                    newPurchase,
+                    ...prevPurchases,
+                ]);
+            }
+
+            setIsModalOpen(false);
+        } catch (err) {
+            console.error("Failed to save purchase:", err);
+            setError("Failed to save purchase. Please try again.");
         }
-        else {
-            const newPurchase = {
-                id: Date.now(),
-                ...purchaseData,
-            };
-
-            setPurchases((prevPurchases) => [
-                newPurchase,
-                ...prevPurchases,
-            ]);
-        }
-
-
-        setIsModalOpen(false);
     };
 
     // ==================================================
@@ -157,20 +202,26 @@ function Purchases() {
     };
 
     // ==================================================
-    // Confirm Delete Purchase
+    // Confirm Delete Purchase (Delete From Firestore)
     // ==================================================
-    const confirmDeletePurchase = () => {
+    const confirmDeletePurchase = async () => {
         if (!purchaseToDelete) return;
 
-        setPurchases((prevPurchases) =>
-            prevPurchases.filter(
-                (purchase) =>
-                    purchase.id !== purchaseToDelete.id
-            )
-        );
+        try {
+            await deletePurchase(purchaseToDelete.id);
 
-        setIsDeleteModalOpen(false);
-        setPurchaseToDelete(null);
+            setPurchases((prevPurchases) =>
+                prevPurchases.filter(
+                    (purchase) => purchase.id !== purchaseToDelete.id
+                )
+            );
+
+            setIsDeleteModalOpen(false);
+            setPurchaseToDelete(null);
+        } catch (err) {
+            console.error("Failed to delete purchase:", err);
+            setError("Failed to delete purchase. Please try again.");
+        }
     };
 
     // ==================================================
@@ -237,15 +288,30 @@ function Purchases() {
             </div>
 
             {/* ==========================================
+                ERROR MESSAGE
+            ========================================== */}
+            {error && (
+                <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
+                    {error}
+                </div>
+            )}
+
+            {/* ==========================================
                 PURCHASE TABLE
             ========================================== */}
-            <PurchaseTable
-                purchases={purchases}
-                suppliers={suppliers}
-                onView={handleViewPurchase}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-            />
+            {isLoading ? (
+                <div className="text-sm text-slate-500 py-8 text-center">
+                    Loading purchases...
+                </div>
+            ) : (
+                <PurchaseTable
+                    purchases={purchases}
+                    suppliers={suppliers}
+                    onView={handleViewPurchase}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                />
+            )}
 
             {/* ==========================================
                 ADD PURCHASE MODAL
@@ -253,19 +319,11 @@ function Purchases() {
             <AddPurchaseModal
                 isOpen={isModalOpen}
                 isEdit={isEditOpen}
-                onClose={() => {
-                    handleCloseAddModal;
-                    setIsModalOpen(false);
-                    setEditingPurchase(null);
-                    setIsEditOpen(false);
-                    handleCloseViewModal
-                }}
-
+                onClose={handleCloseAddModal}
                 suppliers={suppliers}
                 products={products}
                 onAddPurchase={savePurchase}
                 editingPurchase={editingPurchase}
-
             />
 
             {/* ==========================================
@@ -284,11 +342,7 @@ function Purchases() {
             ========================================== */}
             <DeleteModal
                 isOpen={isDeleteModalOpen}
-                onClose={() => {
-                    setIsDeleteModalOpen(false)
-                    setPurchaseToDelete(null)
-                    handleCloseDeleteModal
-                }}
+                onClose={handleCloseDeleteModal}
                 onConfirm={confirmDeletePurchase}
                 title="Delete Purchase"
                 message={
