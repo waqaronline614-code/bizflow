@@ -1,7 +1,5 @@
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import Pagination from "../common/Pagination";
-import { useEffect, useState } from "react";
-import { getPurchase } from "../../services/purchaseService";
 
 function ProductTable({
     products,
@@ -13,46 +11,6 @@ function ProductTable({
     productsPerPage,
     onPageChange,
 }) {
-    // stockByProductId maps a product's id -> total quantity purchased
-    // across all purchase records (aggregated from each purchase's line items).
-    const [stockByProductId, setStockByProductId] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchStock = async () => {
-            try {
-                setIsLoading(true);
-                const purchases = await getPurchase();
-
-                const stockMap = {};
-
-                purchases.forEach((purchase) => {
-                    const items = purchase.items || [];
-
-                    items.forEach((item) => {
-                        const productId = item.productId;
-                        const quantity = Number(item.quantity) || 0;
-
-                        if (!productId) return;
-
-                        stockMap[productId] =
-                            (stockMap[productId] || 0) + quantity;
-                    });
-                });
-
-                setStockByProductId(stockMap);
-            } catch (error) {
-                console.error("Failed to fetch purchases:", error);
-                setError("Failed to load stock data. Please try again.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchStock();
-    }, []);
-
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
@@ -86,13 +44,6 @@ function ProductTable({
                 </select>
 
             </div>
-
-            {/* Error */}
-            {error && (
-                <div className="mx-4 mt-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
-                    {error}
-                </div>
-            )}
 
             {/* Table */}
             <div className="overflow-x-auto">
@@ -137,16 +88,7 @@ function ProductTable({
                     {/* Body */}
                     <tbody>
 
-                        {isLoading ? (
-                            <tr>
-                                <td
-                                    colSpan="7"
-                                    className="py-10 text-center text-sm text-slate-500"
-                                >
-                                    Loading products...
-                                </td>
-                            </tr>
-                        ) : products.length === 0 ? (
+                        {products.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan="7"
@@ -158,12 +100,9 @@ function ProductTable({
                         ) : (
                             products.map((product) => {
 
-                                // Prefer live purchase-derived stock; fall back
-                                // to a stock field on the product itself if present.
-                                const currentStock =
-                                    stockByProductId[product.id] ??
-                                    product.stock ??
-                                    0;
+                                // Real, live stock -- updated by purchaseService (increase)
+                                // and orderService (decrease) directly in Firestore.
+                                const currentStock = Number(product.stock) || 0;
 
                                 const status =
                                     currentStock > 0

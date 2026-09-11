@@ -12,8 +12,22 @@ import {
 } from "react-icons/fi";
 
 import { NavLink } from "react-router-dom";
+import {logOut}  from "../../services/authService"
+import { useNavigate } from "react-router-dom";
 
 function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
+  const nevigate = useNavigate()
+  const handleSubmitt = async ()=>
+  {
+    try {
+      await logOut()
+      nevigate("/login")
+    }
+    catch(err)
+    {
+      console.error("Log out failed:",err)
+    }
+  }
   return (
     <aside
       className={`
@@ -86,10 +100,12 @@ function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
           Management
         </p>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
+        <NavLink to='/orders' className={({isActive})=>`
+        mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3
+         transition cursor-pointer ${isActive ? "bg-blue-600": " hover:bg-slate-800" }`}>
           <FiShoppingCart size={20} />
           <span>Orders</span>
-        </div>
+        </NavLink>
 
         <NavLink to='/purchases'
           className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
@@ -131,7 +147,10 @@ function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
       {/* Logout */}
 
       <div className="border-t border-slate-700 p-4">
-        <div className="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-red-600 transition cursor-pointer">
+        <div className="flex items-center gap-3 rounded-lg px-4 py-3
+         hover:bg-red-600 transition cursor-pointer"
+         onClick={handleSubmitt}
+         >
           <FiLogOut size={20} />
           <span>Logout</span>
         </div>

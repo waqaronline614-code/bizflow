@@ -2,16 +2,18 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useEffect } from "react";
 import ItemsEditor from "../common/ItemsEditor";
 
-function AddPurchaseModal({
+function AddOrderModal({
     isOpen,
     onClose,
-    suppliers,
+    customers,
     products,
-    onAddPurchase,
+    onAddOrder,
     isEdit,
-    editingPurchase
+    editingOrder,
 }) {
-    // ---- MAIN FORM: supplier, payment status, date, items ----
+    // =========================================================
+    // MAIN FORM
+    // =========================================================
     const {
         reset,
         register,
@@ -24,9 +26,9 @@ function AddPurchaseModal({
         formState: { errors },
     } = useForm({
         defaultValues: {
-            supplierId: "",
+            customerId: "",
             paymentStatus: "",
-            purchaseDate: "",
+            orderDate: "",
             amountPaid: "",
             totalDiscount: 0,
             items: [],
@@ -41,23 +43,70 @@ function AddPurchaseModal({
     const amountPaidRaw = watch("amountPaid");
     const totalDiscountRaw = watch("totalDiscount");
 
+    // =========================================================
+    // LOAD EDITING ORDER
+    // =========================================================
     useEffect(() => {
-        if (isEdit && editingPurchase) {
-            reset(editingPurchase);
+        if (isEdit && editingOrder) {
+            reset({
+                customerId: editingOrder.customerId || "",
+                paymentStatus: editingOrder.paymentStatus || "",
+                orderDate: editingOrder.orderDate || "",
+                amountPaid: editingOrder.amountPaid || "",
+                totalDiscount: editingOrder.totalDiscount || 0,
+                items: editingOrder.items || [],
+            });
         }
-    }, [isEdit, editingPurchase, reset]);
+    }, [isEdit, editingOrder, reset]);
 
-    // --------------------------------
-    // Helpers
-    // --------------------------------
+    // =========================================================
+    // HELPERS
+    // =========================================================
     const safeNum = (value) => {
         const num = Number(value);
         return Number.isNaN(num) ? 0 : num;
     };
 
-    // --------------------------------
-    // Totals
-    // --------------------------------
+    // =========================================================
+    // STOCK CALCULATION
+    // =========================================================
+    // When editing an existing saved order, the quantities in that order
+    // were already subtracted from product.stock in the database. Add
+    // them back here so the person can redistribute up to their original
+    // total, not just whatever happens to be left in stock right now.
+    const originalOrderQuantities = (() => {
+        const map = {};
+        if (isEdit && editingOrder?.items) {
+            editingOrder.items.forEach((item) => {
+                map[item.productId] =
+                    (map[item.productId] || 0) + safeNum(item.quantity);
+            });
+        }
+        return map;
+    })();
+
+    const getAvailableStock = (productId, excludeIndex = null) => {
+        const product = products.find(
+            (p) => String(p.id) === String(productId)
+        );
+
+        const currentStock = safeNum(product?.stock);
+        const reserved = originalOrderQuantities[productId] || 0;
+
+        const usedInOrder = items.reduce((sum, item, idx) => {
+            if (idx === excludeIndex) return sum;
+            if (String(item.productId) === String(productId)) {
+                return sum + safeNum(item.quantity);
+            }
+            return sum;
+        }, 0);
+
+        return currentStock + reserved - usedInOrder;
+    };
+
+    // =========================================================
+    // TOTALS
+    // =========================================================
     const totalQuantity = items.reduce((total, item) => total + safeNum(item.quantity), 0);
     const gross = items.reduce((total, item) => total + safeNum(item.amount), 0);
 
@@ -68,6 +117,9 @@ function AddPurchaseModal({
     const amountPaid = safeNum(amountPaidRaw);
     const balance = netAmount - amountPaid;
 
+    // =========================================================
+    // PAYMENT STATUS
+    // =========================================================
     const paymentStatus =
         netAmount <= 0
             ? "unpaid"
@@ -81,11 +133,9 @@ function AddPurchaseModal({
         setValue("paymentStatus", paymentStatus);
     }, [paymentStatus, setValue]);
 
-    if (!isOpen) return null;
-
-    // --------------------------------
-    // Final submit
-    // --------------------------------
+    // =========================================================
+    // FINAL SUBMIT
+    // =========================================================
     const onSubmit = (data) => {
         if (items.length === 0) {
             setError("items", {
@@ -95,12 +145,13 @@ function AddPurchaseModal({
             return;
         }
 
-        onAddPurchase(data);
+        const orderData = { ...data, paymentStatus, items };
+        onAddOrder(orderData);
 
         reset({
-            supplierId: "",
+            customerId: "",
             paymentStatus: "",
-            purchaseDate: "",
+            orderDate: "",
             amountPaid: "",
             totalDiscount: 0,
             items: [],
@@ -111,15 +162,17 @@ function AddPurchaseModal({
 
     const handleCancel = () => {
         reset({
-            supplierId: "",
+            customerId: "",
             paymentStatus: "",
-            purchaseDate: "",
+            orderDate: "",
             amountPaid: "",
             totalDiscount: 0,
             items: [],
         });
         onClose();
     };
+
+    if (!isOpen) return null;
 
     return (
         <div
@@ -134,13 +187,14 @@ function AddPurchaseModal({
                 <div className="flex justify-between items-center px-6 py-5 border-b border-slate-200 shrink-0">
                     <div>
                         <h2 className="text-xl font-bold text-slate-800">
-                            {isEdit ? "Update Purchase" : "Add Purchase"}
+                            {isEdit ? "Update Order" : "Add Order"}
                         </h2>
                         <p className="text-sm text-slate-500 mt-1">
-                            {isEdit ? "Update a Purchase" : "Create a Purchase"}
+                            {isEdit ? "Update an Order" : "Create an Order"}
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={onClose}
                         className="text-3xl text-slate-400 hover:text-red-500 transition mb-7"
                     >
@@ -151,26 +205,26 @@ function AddPurchaseModal({
                 {/* ================= CONTENT ================= */}
                 <div className="p-6 overflow-y-auto">
 
-                    {/* Supplier + Date */}
+                    {/* CUSTOMER + DATE */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Supplier
+                                Customer
                             </label>
                             <select
-                                {...register("supplierId", { required: "Supplier is required" })}
+                                {...register("customerId", { required: "Customer is required" })}
                                 className="w-full h-11 px-4 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                <option value="">Select Supplier</option>
-                                {suppliers.map((supplier) => (
-                                    <option key={supplier.id} value={supplier.id}>
-                                        {supplier.supplierName}
+                                <option value="">Select Customer</option>
+                                {customers.map((customer) => (
+                                    <option key={customer.id} value={customer.id}>
+                                        {customer.fullName}
                                     </option>
                                 ))}
                             </select>
-                            {errors.supplierId && (
+                            {errors.customerId && (
                                 <p className="text-xs text-red-500 mt-1">
-                                    {errors.supplierId.message}
+                                    {errors.customerId.message}
                                 </p>
                             )}
                         </div>
@@ -179,16 +233,16 @@ function AddPurchaseModal({
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Purchase Date
+                                Order Date
                             </label>
                             <input
                                 type="date"
-                                {...register("purchaseDate", { required: "Purchase date is required" })}
+                                {...register("orderDate", { required: "Order date is required" })}
                                 className="w-full h-11 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
-                            {errors.purchaseDate && (
+                            {errors.orderDate && (
                                 <p className="text-xs text-red-500 mt-1">
-                                    {errors.purchaseDate.message}
+                                    {errors.orderDate.message}
                                 </p>
                             )}
                         </div>
@@ -201,9 +255,10 @@ function AddPurchaseModal({
                         append={append}
                         update={update}
                         remove={remove}
-                        priceField="purchasePrice"
+                        priceField="price"
                         priceLabel="Price"
                         onItemsChanged={() => clearMainErrors("items")}
+                        getAvailableStock={getAvailableStock}
                     />
 
                     {errors.items && (
@@ -266,13 +321,13 @@ function AddPurchaseModal({
                             <div className="border-t border-slate-300 pt-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-800">
-                                        Amount Paid
+                                        Amount Received
                                     </span>
                                     <input
                                         type="number"
                                         min="0"
                                         {...register("amountPaid", {
-                                            required: "Amount paid is required",
+                                            required: "Amount received is required",
                                             min: { value: 0, message: "Min 0" },
                                         })}
                                         placeholder="0"
@@ -312,7 +367,7 @@ function AddPurchaseModal({
                         onClick={handleSubmit(onSubmit)}
                         className="px-5 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
                     >
-                        {isEdit ? "Update Purchase" : "Add Purchase"}
+                        {isEdit ? "Update Order" : "Add Order"}
                     </button>
                 </div>
             </div>
@@ -320,4 +375,4 @@ function AddPurchaseModal({
     );
 }
 
-export default AddPurchaseModal;
+export default AddOrderModal;

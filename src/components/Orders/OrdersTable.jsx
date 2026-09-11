@@ -1,8 +1,18 @@
-import { FiEye, FiEdit2, FiTrash2, FiCalendar, FiPackage } from "react-icons/fi";
+import { FiEye, FiEdit2, FiTrash2, FiCalendar, FiUser } from "react-icons/fi";
+import Pagination from "../common/Pagination";
 
-function PurchaseTable({ purchases,
-    suppliers,
-    onView, onEdit, onDelete, }) {
+function OrderTable({
+    orders = [],
+    customers = [],
+    onView,
+    onEdit,
+    onDelete,
+    currentPage,
+    totalPages,
+    totalOrders,
+    ordersPerPage,
+    onPageChange,
+}) {
 
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
@@ -21,40 +31,40 @@ function PurchaseTable({ purchases,
     };
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden text-sm">
 
             <div className="overflow-x-auto">
 
-                <table className="w-full min-w-[600px] table-fixed">
+                <table className="w-full min-w-[700px] table-fixed">
 
                     {/* Header */}
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-2 py-1.5 text-left text-[14px] font-semibold text-slate-700 w-[95px]">
-                                Invoice
+                            <th className="px-2 py-2 text-left text-[14px] font-semibold text-slate-700 w-[100px]">
+                                Order
                             </th>
-                            <th className="px-2 py-1.5 text-left text-[14px] font-semibold text-slate-700 w-[190px]">
-                                Supplier / Items
+                            <th className="px-2 py-2 text-left text-[14px] font-semibold text-slate-700 w-[190px]">
+                                Customer / Items
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[75px]">
                                 Total
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[80px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[85px]">
                                 Discount
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[75px]">
                                 Net
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[75px]">
                                 Paid
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[75px]">
                                 Balance
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[65px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
                                 Status
                             </th>
-                            <th className="px-1.5 py-1.5 text-center text-[14px] font-semibold text-slate-700 w-[65px]">
+                            <th className="px-1.5 py-2 text-center text-[14px] font-semibold text-slate-700 w-[70px]">
                                 Actions
                             </th>
                         </tr>
@@ -63,39 +73,38 @@ function PurchaseTable({ purchases,
                     {/* Body */}
                     <tbody>
 
-                        {purchases.length === 0 ? (
+                        {orders.length === 0 ? (
 
                             <tr>
-                                <td colSpan="9" className="py-6 text-center text-xs text-slate-500">
-                                    No Purchases added yet.
+                                <td colSpan="9" className="py-7 text-center text-xs text-slate-500">
+                                    No Orders added yet.
                                 </td>
                             </tr>
 
                         ) : (
 
-                            purchases.map((purchase) => {
+                            orders.map((order) => {
 
-                                const items = Array.isArray(purchase.items) ? purchase.items : [];
+                                const items = Array.isArray(order.items) ? order.items : [];
 
                                 const totalQuantity = items.reduce(
                                     (total, item) => total + safeNum(item.quantity),
                                     0
                                 );
 
-                                const totalAmount = items.reduce(
+                                const gross = items.reduce(
                                     (total, item) => total + safeNum(item.amount),
                                     0
                                 );
 
-                                const gross = totalAmount;
-                                const discountPercent = safeNum(purchase.totalDiscount);
-                                const discountBalance = gross * (discountPercent / 100);
-                                const netAmount = gross - discountBalance;
-                                const amountPaid = safeNum(purchase.amountPaid);
+                                const discountPercent = safeNum(order.totalDiscount);
+                                const discountAmount = gross * (discountPercent / 100);
+                                const netAmount = gross - discountAmount;
+                                const amountPaid = safeNum(order.amountPaid);
                                 const balance = netAmount - amountPaid;
 
-                                const supplier = suppliers.find(
-                                    (supplier) => supplier.id.toString() === purchase.supplierId.toString()
+                                const customer = customers.find(
+                                    (c) => c.id?.toString() === order.customerId?.toString()
                                 );
 
                                 const productNames = items
@@ -103,33 +112,35 @@ function PurchaseTable({ purchases,
                                     .filter(Boolean)
                                     .join(", ");
 
-                                const invoiceLabel = purchase.purchaseNo || `#${purchase.id}`;
+                                const orderLabel = order.orderNo || `#${order.id}`;
+
+                                const status = order.paymentStatus?.toLowerCase() || "unpaid";
 
                                 return (
                                     <tr
-                                        key={purchase.id}
+                                        key={order.id}
                                         className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-150 align-top"
                                     >
 
-                                        {/* Invoice + Date */}
-                                        <td className="px-2 py-1.5">
+                                        {/* Order + Date */}
+                                        <td className="px-2 py-2">
                                             <div className="text-xs font-semibold text-slate-800 truncate">
-                                                {invoiceLabel}
+                                                {orderLabel}
                                             </div>
                                             <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-slate-500">
                                                 <FiCalendar size={10} className="text-slate-400 shrink-0" />
-                                                {formatDate(purchase.purchaseDate)}
+                                                {formatDate(order.orderDate)}
                                             </div>
                                         </td>
 
-                                        {/* Supplier + Items */}
-                                        <td className="px-2 py-1.5">
+                                        {/* Customer + Items */}
+                                        <td className="px-2 py-2">
                                             <div className="text-xs font-medium text-slate-800 truncate">
-                                                {supplier?.supplierName || "-"}
+                                                {customer?.fullName || "-"}
                                             </div>
 
                                             <div className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-500">
-                                                <FiPackage size={10} className="text-slate-400 shrink-0" />
+                                                <FiUser size={10} className="text-slate-400 shrink-0" />
                                                 {items.length} item{items.length !== 1 ? "s" : ""} · {totalQuantity} qty
                                             </div>
 
@@ -144,50 +155,52 @@ function PurchaseTable({ purchases,
                                         </td>
 
                                         {/* Total */}
-                                        <td className="px-1.5 py-1.5 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
-                                            {totalAmount.toLocaleString()}
+                                        <td className="px-1.5 py-2 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
+                                            {gross.toLocaleString()}
                                         </td>
 
                                         {/* Discount (% + Rs combined) */}
-                                        <td className="px-1.5 py-1.5 text-center text-[14px] text-slate-600 whitespace-nowrap">
+                                        <td className="px-1.5 py-2 text-center text-[14px] text-slate-600 whitespace-nowrap">
                                             <div className="font-medium text-slate-700">{discountPercent}%</div>
-                                            <div className="text-slate-500">Rs. {discountBalance.toLocaleString()}</div>
+                                            <div className="text-slate-500">Rs. {discountAmount.toLocaleString()}</div>
                                         </td>
+
                                         {/* Net */}
-                                        <td className="px-1.5 py-1.5 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
+                                        <td className="px-1.5 py-2 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
                                             {netAmount.toLocaleString()}
                                         </td>
+
                                         {/* Paid */}
-                                        <td className="px-1.5 py-1.5 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
+                                        <td className="px-1.5 py-2 text-center text-xs font-semibold text-slate-800 whitespace-nowrap">
                                             {amountPaid.toLocaleString()}
                                         </td>
 
                                         {/* Balance */}
-                                        <td className={`px-1.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap ${balance > 0 ? "text-red-600" : "text-green-600"}`}>
+                                        <td className={`px-1.5 py-2 text-center text-xs font-semibold whitespace-nowrap ${balance > 0 ? "text-red-600" : "text-green-600"}`}>
                                             {balance.toLocaleString()}
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-1.5 py-1.5 text-center">
+                                        <td className="px-1.5 py-2 text-center">
                                             <span
-                                                className={`inline-block px-1.5 py-0.5 rounded-full text-[9px] font-semibold whitespace-nowrap ${purchase.paymentStatus?.toLowerCase() === "paid"
+                                                className={`inline-block px-1.5 py-0.5 rounded-full text-[9px] font-semibold whitespace-nowrap capitalize ${status === "paid"
                                                     ? "bg-green-100 text-green-700"
-                                                    : purchase.paymentStatus?.toLowerCase() === "partial"
+                                                    : status === "partial"
                                                         ? "bg-yellow-100 text-yellow-700"
                                                         : "bg-red-100 text-red-700"
                                                     }`}
                                             >
-                                                {purchase.paymentStatus}
+                                                {status}
                                             </span>
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-1.5 py-1.5">
+                                        <td className="px-1.5 py-2">
                                             <div className="flex justify-center items-center gap-0.5">
 
                                                 <button
                                                     type="button"
-                                                    onClick={() => onView && onView(purchase)}
+                                                    onClick={() => onView && onView(order)}
                                                     className="p-1 rounded-md hover:bg-blue-100 text-blue-600 transition"
                                                     title="View"
                                                 >
@@ -196,15 +209,16 @@ function PurchaseTable({ purchases,
 
                                                 <button
                                                     type="button"
-                                                    onClick={() => onEdit && onEdit(purchase)}
+                                                    onClick={() => onEdit && onEdit(order)}
                                                     className="p-1 rounded-md hover:bg-green-100 text-green-600 transition"
                                                     title="Edit"
                                                 >
                                                     <FiEdit2 size={12} />
                                                 </button>
+
                                                 <button
                                                     type="button"
-                                                    onClick={() => onDelete && onDelete(purchase)}
+                                                    onClick={() => onDelete && onDelete(order)}
                                                     className="p-1 rounded-md hover:bg-red-100 text-red-600 transition"
                                                     title="Delete"
                                                 >
@@ -226,8 +240,18 @@ function PurchaseTable({ purchases,
 
             </div>
 
+            {/* Pagination */}
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalOrders}
+                itemsPerPage={ordersPerPage}
+                itemName="orders"
+                onPageChange={onPageChange}
+            />
+
         </div>
     );
 }
 
-export default PurchaseTable;
+export default OrderTable;

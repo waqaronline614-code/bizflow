@@ -6,9 +6,11 @@ import {
 } from "react-icons/fi";
 
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"
 
 function Navbar({ setIsSidebarOpen }) {
 
+  const { currentUser } = useAuth()
   const location = useLocation()
   const pageTitles = {
     "/dashboard": "Dashboard",
@@ -72,12 +74,15 @@ function Navbar({ setIsSidebarOpen }) {
         <div className="flex items-center gap-3">
 
           <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
-            WS
+            {currentUser?.displayName
+              ?.split(" ")
+              .map((word) => word.charAt(0).toUpperCase())
+              .join("") || "U"}
           </div>
 
           <div className="hidden md:block leading-tight">
             <p className="font-semibold text-slate-800">
-              Waqar Shah
+               {currentUser?.displayName || currentUser?.email || "User"}
             </p>
 
             <p className="text-sm text-slate-500">

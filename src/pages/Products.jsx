@@ -1,69 +1,36 @@
 import { FiPlus } from "react-icons/fi";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import ProductTable from "../components/products/ProductTable";
 import AddProductModal from "../components/products/AddProductModal";
 import DeleteModal from "../components/common/DeleteModal";
 
-import {
-  addProduct,
-  getProducts,
-  updateProduct,
-  deleteProduct,
-} from "../services/productService";
+import { useProducts } from "../hooks/useProducts";
+import { addProduct, updateProduct, deleteProduct } from "../services/productService";
 
 function Products() {
-  const [products, setProducts] = useState([]);
+  // All fetching/loading/error/refetch logic now lives in this one hook.
+  const { products, setProducts, isLoading, error: fetchError, refetch } = useProducts();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [saveError, setSaveError] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [editingProduct, setEditingProduct] = useState(null);
-
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [productToDelete, setProductToDelete] = useState(null);
-
-  // --------------------------------
-  // Load products from Firestore on mount
-  // --------------------------------
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   // Pagination
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const productsPerPage = 6;
 
-  const totalPages = Math.ceil(
-    products.length / productsPerPage
-  );
+  const totalPages = Math.ceil(products.length / productsPerPage);
 
   const paginatedProducts = useMemo(() => {
-    const startIndex =
-      (currentPage - 1) * productsPerPage;
-
-    return products.slice(
-      startIndex,
-      startIndex + productsPerPage
-    );
+    const startIndex = (currentPage - 1) * productsPerPage;
+    return products.slice(startIndex, startIndex + productsPerPage);
   }, [products, currentPage]);
 
   // Delete
@@ -76,16 +43,11 @@ function Products() {
   const confirmDeleteProduct = async () => {
     try {
       await deleteProduct(productToDelete.id);
-
-      setProducts((prev) =>
-        prev.filter(
-          (product) => product.id !== productToDelete.id
-        )
-      );
-
+      setProducts((prev) => prev.filter((product) => product.id !== productToDelete.id));
       setCurrentPage(1);
     } catch (error) {
       console.error("Failed to delete product:", error);
+      setSaveError("Failed to delete product. Please try again.");
     } finally {
       setProductToDelete(null);
       setIsDeleteModalOpen(false);
@@ -96,9 +58,7 @@ function Products() {
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
-
     setIsEditMode(true);
-
     setIsModalOpen(true);
   };
 
@@ -112,36 +72,33 @@ function Products() {
         setProducts((prev) =>
           prev.map((product) =>
             product.id === editingProduct.id
-              ? {
-                ...product,
-                ...productData,
-              }
+              ? { ...product, ...productData }
               : product
           )
         );
 
         setIsEditMode(false);
-
         setEditingProduct(null);
       } else {
         const newId = await addProduct(productData);
 
-        setProducts((prev) => [
-          {
-            id: newId,
-            ...productData,
-          },
-          ...prev,
-        ]);
+        setProducts((prev) => [{ id: newId, stock: 0, ...productData }, ...prev]);
+
+        // A fresh fetch keeps this in sync with whatever the server set
+        // (e.g. stock: 0, createdAt) rather than guessing it locally.
+        await refetch();
 
         setCurrentPage(1);
       }
     } catch (error) {
       console.error("Failed to save product:", error);
+      setSaveError("Failed to save product. Please try again.");
     } finally {
       setIsModalOpen(false);
     }
   };
+
+  const error = fetchError || saveError;
 
   return (
     <div>
@@ -161,10 +118,15 @@ function Products() {
           }}
         >
           <FiPlus />
-
           Add Product
         </button>
       </div>
+
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
+          {error}
+        </div>
+      )}
 
       {isLoading ? (
         <p className="text-red-500 flex justify-center">Loading products...</p>
