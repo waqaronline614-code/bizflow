@@ -18,7 +18,12 @@ function Navbar({ setIsSidebarOpen }) {
     "/products": "Products",
     "/orders": "Orders",
     "/suppliers": "Suppliers",
-    "/purchases": 'Purchases'
+    "/purchases": 'Purchases',
+    "/receivedPayments": 'Received Payments',
+    "/madePayments": 'Make a Payments',
+    "/receivedPayments": 'Received Payments',
+    "/accounts": 'Accounts',
+    "/expenses": 'Expenses',
   };
 
   const currentPage = pageTitles[location.pathname] || "Dashboard";
@@ -32,7 +37,8 @@ function Navbar({ setIsSidebarOpen }) {
       <div className="flex items-center gap-4">
 
         {/* Mobile Menu */}
-        <button className="md:hidden text-2xl text-slate-700 hover:text-blue-600" onClick={() => setIsSidebarOpen(true)}>
+        <button className="md:hidden text-2xl text-slate-700 hover:text-blue-600"
+         onClick={() => setIsSidebarOpen(true)}>
           <FiMenu />
         </button>
 
@@ -73,7 +79,8 @@ function Navbar({ setIsSidebarOpen }) {
         {/* User */}
         <div className="flex items-center gap-3">
 
-          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center
+           justify-center font-semibold">
             {currentUser?.displayName
               ?.split(" ")
               .map((word) => word.charAt(0).toUpperCase())

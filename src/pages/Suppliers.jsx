@@ -10,6 +10,7 @@ import {
     getSuppliers,
     updateSupplier,
     deleteSupplier,
+    getAllSupplierBalances,
 } from "../services/supplierService";
 
 function Suppliers() {
@@ -50,25 +51,27 @@ function Suppliers() {
     }, [suppliers, currentPage]);
 
     // -----------------------------
-    // Fetch Suppliers
+    // Fetch Suppliers, enriched with computed balances
     // -----------------------------
+    const fetchSuppliers = async () => {
+        try {
+            setIsLoading(true);
+
+            const data = await getSuppliers();
+            const withBalances = await getAllSupplierBalances(
+                Array.isArray(data) ? data : []
+            );
+
+            setSuppliers(withBalances);
+        } catch (error) {
+            console.error("Failed to fetch suppliers:", error);
+            setSuppliers([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchSuppliers = async () => {
-            try {
-                setIsLoading(true);
-
-                const data = await getSuppliers();
-
-                // Make sure suppliers is always an array
-                setSuppliers(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Failed to fetch suppliers:", error);
-                setSuppliers([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchSuppliers();
     }, []);
 
@@ -100,42 +103,21 @@ function Suppliers() {
     };
 
     // -----------------------------
-    // Save Supplier
+    // Save Supplier — refetch (with fresh balances) after add/update
     // -----------------------------
     const saveSupplier = async (supplierData) => {
         try {
             if (isEditMode && editingSupplier) {
-                // Update existing supplier
                 await updateSupplier(
                     editingSupplier.id,
                     supplierData
                 );
-
-                setSuppliers((prev) =>
-                    prev.map((supplier) =>
-                        supplier.id === editingSupplier.id
-                            ? {
-                                ...supplier,
-                                ...supplierData,
-                            }
-                            : supplier
-                    )
-                );
             } else {
-                // Add new supplier
-                const newId = await addSupplier(supplierData);
-
-                setSuppliers((prev) => [
-                    ...prev,
-                    {
-                        id: newId,
-                        ...supplierData,
-                    },
-                ]);
-
-                // Go to the first page after adding
+                await addSupplier(supplierData);
                 setCurrentPage(1);
             }
+
+            await fetchSuppliers();
 
             handleCloseModal();
         } catch (error) {
@@ -177,7 +159,6 @@ function Suppliers() {
                 )
             );
 
-            // Reset to page 1 if necessary
             setCurrentPage(1);
         } catch (error) {
             console.error(
@@ -270,4 +251,3 @@ function Suppliers() {
 }
 
 export default Suppliers;
-

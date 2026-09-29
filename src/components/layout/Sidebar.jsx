@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   FiHome,
   FiUsers,
@@ -8,26 +9,40 @@ import {
   FiBarChart2,
   FiSettings,
   FiLogOut,
-  FiX
+  FiX,
+  FiTrendingUp,
+  FiRotateCcw,
+  FiDollarSign,
+  FiChevronDown,
+  FiBriefcase
 } from "react-icons/fi";
 
-import { NavLink } from "react-router-dom";
-import {logOut}  from "../../services/authService"
+import { NavLink, useLocation } from "react-router-dom";
+import { logOut } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 
 function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
-  const nevigate = useNavigate()
-  const handleSubmitt = async ()=>
-  {
+  const nevigate = useNavigate();
+  const location = useLocation();
+  const [isSalesOpen, setIsSalesOpen] = useState(true);
+  const [isPurchasesOpen, setIsPurchasesOpen] = useState(true);
+
+  const isSalesActive = location.pathname.startsWith("/sales");
+  const isPurchasesActive = location.pathname.startsWith("/purchases");
+
+  const handleSubmitt = async () => {
     try {
-      await logOut()
-      nevigate("/login")
+      await logOut();
+      nevigate("/login");
+    } catch (err) {
+      console.error("Log out failed:", err);
     }
-    catch(err)
-    {
-      console.error("Log out failed:",err)
-    }
-  }
+  };
+
+  const subLinkClass = ({ isActive }) =>
+    `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition cursor-pointer
+     ${isActive ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"}`;
+
   return (
     <aside
       className={`
@@ -100,27 +115,109 @@ function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
           Management
         </p>
 
-        <NavLink to='/orders' className={({isActive})=>`
-        mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3
-         transition cursor-pointer ${isActive ? "bg-blue-600": " hover:bg-slate-800" }`}>
-          <FiShoppingCart size={20} />
-          <span>Orders</span>
-        </NavLink>
+        {/* Sales - collapsible group */}
+        <button
+          type="button"
+          onClick={() => setIsSalesOpen((prev) => !prev)}
+          className={`w-full mx-3 mb-1 flex items-center justify-between gap-3 rounded-lg px-4 py-3
+           transition cursor-pointer ${isSalesActive ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+          style={{ width: "calc(100% - 1.5rem)" }}
+        >
+          <span className="flex items-center gap-3">
+            <FiTrendingUp size={20} />
+            <span>Sales</span>
+          </span>
+          <FiChevronDown
+            size={16}
+            className={`transition-transform duration-200 ${isSalesOpen ? "rotate-180" : ""}`}
+          />
+        </button>
 
-        <NavLink to='/purchases'
+        {isSalesOpen && (
+          <div className="ml-6 mr-3 mb-2 flex flex-col gap-1 border-l border-slate-700 pl-3">
+            <NavLink to="/orders" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiShoppingCart size={17} />
+              <span>Orders</span>
+            </NavLink>
+
+            <NavLink to="/returns" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiRotateCcw size={17} />
+              <span>Returns</span>
+            </NavLink>
+
+            <NavLink to="/receivedPayments" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiDollarSign size={17} />
+              <span>Payments received</span>
+            </NavLink>
+          </div>
+        )}
+
+        {/* Purchases - collapsible group */}
+        <button
+          type="button"
+          onClick={() => setIsPurchasesOpen((prev) => !prev)}
+         className={`w-full mx-3 mb-1 flex items-center justify-between gap-3 rounded-lg px-4 py-3
+           transition cursor-pointer ${isSalesActive ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+          style={{ width: "calc(100% - 1.5rem)" }}
+        >
+          <span className="flex items-center gap-3">
+            <FiTruck size={20} />
+            <span>Goods receiving</span>
+          </span>
+          <FiChevronDown
+            size={16}
+            className={`transition-transform duration-200 ${isPurchasesOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {isPurchasesOpen && (
+          <div className="ml-6 mr-3 mb-2 flex flex-col gap-1 border-l border-slate-700 pl-3">
+            <NavLink to="/purchases" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiBox size={17} />
+              <span>Purchases</span>
+            </NavLink>
+
+            <NavLink to="/returns" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiRotateCcw size={17} />
+              <span>Returns</span>
+            </NavLink>
+
+            <NavLink to="/madePayments" onClick={() => setIsSidebarOpen(false)} className={subLinkClass}>
+              <FiCreditCard size={17} />
+              <span>Make a payment</span>
+            </NavLink>
+          </div>
+        )}
+
+        {/* Accounts */}
+
+        <p className="px-6 mt-8 mb-3 text-xs uppercase tracking-widest text-slate-500">
+          Accounts
+        </p>
+
+        <NavLink to="/accounts"
           className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
             ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
         `}>
-          <FiTruck size={20} />
-          <span>Purchases</span>
+          <FiBriefcase size={20} />
+          <span>Accounts</span>
         </NavLink>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
-          <FiCreditCard size={20} />
-          <span>Payments</span>
-        </div>
+        {/* Expenses */}
 
-        {/* REPORTS */}
+        <p className="px-6 mt-8 mb-3 text-xs uppercase tracking-widest text-slate-500">
+          Expenses
+        </p>
+
+        <NavLink to="/expenses"
+          className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
+        `}>
+          <FiBriefcase size={20} />
+          <span>Expenses</span>
+        </NavLink>
+
+         {/* REPORTS */}
 
         <p className="px-6 mt-8 mb-3 text-xs uppercase tracking-widest text-slate-500">
           Reports

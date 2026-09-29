@@ -1,6 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { useEffect } from "react";
 import ItemsEditor from "../common/ItemsEditor";
+import { useAccounts } from "../../hooks/Useaccounts";
 
 function AddPurchaseModal({
     isOpen,
@@ -12,6 +13,7 @@ function AddPurchaseModal({
     editingPurchase
 }) {
     // ---- MAIN FORM: supplier, payment status, date, items ----
+    const {accounts} = useAccounts()
     const {
         reset,
         register,
@@ -21,23 +23,24 @@ function AddPurchaseModal({
         setValue,
         watch,
         clearErrors: clearMainErrors,
-        formState: { errors },
+        formState: { errors }
     } = useForm({
         defaultValues: {
             supplierId: "",
             paymentStatus: "",
             purchaseDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         },
     });
-
     const { fields: items, append, remove, update } = useFieldArray({
         control,
         name: "items",
     });
-
+    
     const amountPaidRaw = watch("amountPaid");
     const totalDiscountRaw = watch("totalDiscount");
 
@@ -95,13 +98,21 @@ function AddPurchaseModal({
             return;
         }
 
-        onAddPurchase(data);
+        const paidAmount = safeNum(data.amountPaid);
+
+        onAddPurchase({
+            ...data,
+            paymentMethod: paidAmount > 0 ? data.paymentMethod : "",
+            referenceNote: paidAmount > 0 ? data.referenceNote || "" : "",
+        });
 
         reset({
             supplierId: "",
             paymentStatus: "",
             purchaseDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         });
@@ -115,6 +126,8 @@ function AddPurchaseModal({
             paymentStatus: "",
             purchaseDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         });
@@ -159,7 +172,8 @@ function AddPurchaseModal({
                             </label>
                             <select
                                 {...register("supplierId", { required: "Supplier is required" })}
-                                className="w-full h-11 px-4 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full h-11 px-4 rounded-xl border border-slate-300 bg-white 
+                                focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="">Select Supplier</option>
                                 {suppliers.map((supplier) => (
@@ -283,6 +297,47 @@ function AddPurchaseModal({
                                     <p className="text-xs text-red-500 mt-1 text-right">
                                         {errors.amountPaid.message}
                                     </p>
+                                )}
+
+                                {amountPaid > 0 && (
+                                    <div className="flex items-center justify-between mt-3">
+                                        <span className="text-sm font-bold text-slate-800">
+                                            Paid From
+                                        </span>
+                                        <select
+                                            {...register("paymentMethod", {
+                                                validate: (value) =>
+                                                    amountPaid <= 0 || !!value || "Choose an account",
+                                            })}
+                                            className="w-40 h-11 px-3 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="">Select account</option>
+                                            {accounts.map((account) => (
+                                                <option key={account.id} value={account.name}>
+                                                    {account.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                {errors.paymentMethod && (
+                                    <p className="text-xs text-red-500 mt-1 text-right">
+                                        {errors.paymentMethod.message}
+                                    </p>
+                                )}
+
+                                {amountPaid > 0 && (
+                                    <div className="mt-3">
+                                        <label className="block text-xs font-medium text-slate-500 mb-1 text-right">
+                                            Reference / Note (optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. cheque no., transaction id"
+                                            {...register("referenceNote")}
+                                            className="w-full h-10 px-3 rounded-xl border border-slate-300 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 )}
                             </div>
 

@@ -8,12 +8,20 @@ import DeleteModal from "../components/common/DeleteModal";
 
 import { useProducts } from "../hooks/useProducts";
 import { usePurchases } from "../hooks/usePurchases";
+import { useAccounts } from "../hooks/Useaccounts";
 import {
     addPurchase,
     updatePurchase,
     deletePurchase,
 } from "../services/purchaseService";
 import { getSuppliers } from "../services/supplierService";
+import {
+    addPayment,
+    updatePayment,
+    deletePayment,
+    getPaymentsByRelated,
+} from "../services/paymentsService";
+import { adjustAccountBalance } from "../services/Accountsservice";
 
 
 function Purchases() {
@@ -27,6 +35,7 @@ function Purchases() {
         isLoading,
         error: fetchError,
     } = usePurchases();
+    const { accounts, applyLocalDelta } = useAccounts();
 
     const [saveError, setSaveError] = useState(null);
 
@@ -70,6 +79,9 @@ function Purchases() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingPurchase, setEditingPurchase] = useState(null);
 
+    // Helper: the modal's "Paid From" select stores the account NAME
+    const findAccountByName = (name) => accounts.find((a) => a.name === name);
+
     // ==================================================
     // Open Edit Purchase Modal
     // ==================================================
@@ -100,7 +112,12 @@ function Purchases() {
     // ==================================================
     const savePurchase = async (purchaseData) => {
         try {
+            const amountPaid = Number(purchaseData.amountPaid) || 0;
+            let purchaseId;
+
             if (isEditOpen && editingPurchase) {
+                purchaseId = editingPurchase.id;
+
                 // pass the purchase's OLD items so purchaseService can reverse
                 // the old purchase's stock impact before applying the new one
                 await updatePurchase(editingPurchase.id, purchaseData, editingPurchase.items);
@@ -117,11 +134,68 @@ function Purchases() {
                 setEditingPurchase(null);
             } else {
                 const { id, purchaseNo } = await addPurchase(purchaseData);
+                purchaseId = id;
 
                 setPurchases((prevPurchases) => [
                     { id, purchaseNo, ...purchaseData },
                     ...prevPurchases,
                 ]);
+            }
+
+            // --------------------------------
+            // Keep the linked payment in sync with "Amount Paid" on the form.
+            // --------------------------------
+            const existingPayments = await getPaymentsByRelated(purchaseId, "purchase");
+            const existingPayment = existingPayments[0];
+
+            // capture the OLD payment's account + amount before overwriting,
+            // so we can reverse its balance effect
+            const oldAccount = existingPayment ? findAccountByName(existingPayment.method) : null;
+            const oldAmount = existingPayment ? Number(existingPayment.amount) || 0 : 0;
+
+            const newAccount = purchaseData.paymentMethod
+                ? findAccountByName(purchaseData.paymentMethod)
+                : null;
+
+            if (existingPayment) {
+                if (amountPaid > 0) {
+                    await updatePayment(existingPayment.id, {
+                        amount: amountPaid,
+                        date: purchaseData.purchaseDate,
+                        method: purchaseData.paymentMethod || "Cash",
+                        reference: purchaseData.referenceNote || "",
+                    });
+                }
+                // if amountPaid is 0 on an edit, we leave the existing payment
+                // alone rather than deleting it -- delete it from Make Payments
+                // directly if that payment should be removed entirely
+            } else if (amountPaid > 0) {
+                await addPayment({
+                    type: "made",
+                    partyType: "supplier",
+                    partyId: purchaseData.supplierId,
+                    relatedType: "purchase",
+                    relatedId: purchaseId,
+                    amount: amountPaid,
+                    date: purchaseData.purchaseDate,
+                    method: purchaseData.paymentMethod || "Cash",
+                    reference: purchaseData.referenceNote || "",
+                });
+            }
+
+            // --------------------------------
+            // Balance sync: a purchase payment is money OUT.
+            // Reverse the old payment's effect (add it back), then apply
+            // the new one (subtract it). On a fresh add, oldAccount is null
+            // so only the new debit applies.
+            // --------------------------------
+            if (oldAccount && oldAmount > 0) {
+                await adjustAccountBalance(oldAccount.id, oldAmount);
+                applyLocalDelta(oldAccount.id, oldAmount);
+            }
+            if (newAccount && amountPaid > 0) {
+                await adjustAccountBalance(newAccount.id, -amountPaid);
+                applyLocalDelta(newAccount.id, -amountPaid);
             }
 
             // stock changed -- refresh products so the UI shows the latest numbers
@@ -166,6 +240,25 @@ function Purchases() {
         try {
             // pass the purchase's items so stock can be reversed
             await deletePurchase(purchaseToDelete.id, purchaseToDelete.items);
+
+            // --------------------------------
+            // Reverse any linked payment's effect on the account balance,
+            // then delete the payment record itself.
+            // --------------------------------
+            const linkedPayments = await getPaymentsByRelated(purchaseToDelete.id, "purchase");
+            const linkedPayment = linkedPayments[0];
+
+            if (linkedPayment) {
+                const linkedAccount = findAccountByName(linkedPayment.method);
+                const linkedAmount = Number(linkedPayment.amount) || 0;
+
+                if (linkedAccount && linkedAmount > 0) {
+                    await adjustAccountBalance(linkedAccount.id, linkedAmount);
+                    applyLocalDelta(linkedAccount.id, linkedAmount);
+                }
+
+                await deletePayment(linkedPayment.id);
+            }
 
             setPurchases((prevPurchases) =>
                 prevPurchases.filter(

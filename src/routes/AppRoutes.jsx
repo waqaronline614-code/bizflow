@@ -10,6 +10,10 @@ import Suppliers from "../pages/Suppliers";
 import Purchases from "../pages/Purchases";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import Orders from "../pages/Orders"
+import ReceivedPayments from "../pages/ReceivedPayments"
+import MadePayments from "../pages/Madepayments";
+import Accounts from "../pages/Accounts";
+import Expenses from "../pages/Expenses";
 
 function AppRoutes()
 {
@@ -26,6 +30,10 @@ function AppRoutes()
             <Route path="/suppliers" element={<Suppliers/>}/>
             <Route path="/purchases" element={<Purchases/>}/>
             <Route path="/orders" element={<Orders/>}/>
+            <Route path="/receivedPayments" element={<ReceivedPayments/>}/>
+            <Route path="/madePayments" element={<MadePayments/>}/>
+            <Route path="/accounts" element={<Accounts/>}/>
+            <Route path="/expenses" element={<Expenses/>}/>
             </Route>
            <Route path="*" element={<NotFound/>} />
         </Routes>

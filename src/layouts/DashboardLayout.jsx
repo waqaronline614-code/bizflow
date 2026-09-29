@@ -30,7 +30,7 @@ function DashboardLayout() {
         )}
 
         {/* Main */}
-           <main className="flex-1 ml-0 lg:ml-64 mt-16 h-[calc(100vh-4rem)] overflow-y-auto bg-slate-100
+           <main className="flex-1 ml-0 lg:ml-64 mt-16 h-[calc(100vh-4rem)]  bg-slate-100
             p-8 flex flex-col">
               <div className="flex-1">
                  <Outlet />

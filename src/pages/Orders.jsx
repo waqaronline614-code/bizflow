@@ -1,11 +1,13 @@
 import { FiPlus } from "react-icons/fi";
 import AddOrderModal from "../components/Orders/AddOrderModal";
 import OrderTable from "../components/Orders/OrdersTable";
+import OrderViewModal from "../components/Orders/OrderViewModal";
 import DeleteModal from "../components/common/DeleteModal";
 import { useEffect, useMemo, useState } from "react";
 import { getCustomers } from "../services/customerService";
 import { getProducts } from "../services/productService";
 import { getPurchase } from "../services/purchaseService";
+import { getPaymentsByRelated } from "../services/paymentsService";
 import {
     addOrder,
     getOrders,
@@ -27,6 +29,10 @@ function Orders() {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState(null);
+
+    // View
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [viewingOrder, setViewingOrder] = useState(null);
 
     const handleIsModalOpen = () => setIsAddModalOpen(true);
 
@@ -93,33 +99,29 @@ function Orders() {
     const saveOrders = async (orderData) => {
         try {
             if (isEditing && editingOrder) {
-                // pass the order's OLD items so orderService can reverse
-                // the old sale's stock impact before applying the new one
-                await updateOrder(editingOrder.id, orderData, editingOrder.items);
+                const updatedOrder = await updateOrder(editingOrder.id, orderData, editingOrder.items);
 
                 setOrders((prev) =>
                     prev.map((order) =>
                         order.id === editingOrder.id
-                            ? { ...order, ...orderData }
+                            ? updatedOrder
                             : order
                     )
                 );
 
-                // editing also changes stock -- refresh products
                 const updatedProducts = await getProducts();
                 setProducts(updatedProducts);
 
                 setIsEditing(false);
                 setEditingOrder(null);
             } else {
-                const { id, orderNo } = await addOrder(orderData);
+                const newOrder = await addOrder(orderData);
 
                 setOrders((prev) => [
-                    { id, orderNo, ...orderData },
+                    newOrder,
                     ...prev,
                 ]);
 
-                // Refresh products so the UI shows the updated stock
                 const updatedProducts = await getProducts();
                 setProducts(updatedProducts);
 
@@ -137,10 +139,26 @@ function Orders() {
     // Edit
     // --------------------------------
 
-    const handleEditOrder = (order) => {
-        setEditingOrder(order);
+    const handleEditOrder = async (order) => {
+        try {
+            const linkedPayments = await getPaymentsByRelated(order.id, "order");
+            const paymentMethod = linkedPayments.length > 0 ? linkedPayments[0].method : "Cash";
+            setEditingOrder({ ...order, paymentMethod });
+        } catch (err) {
+            console.error("Failed to fetch payment method:", err);
+            setEditingOrder(order);
+        }
         setIsEditing(true);
         setIsAddModalOpen(true);
+    };
+
+    // --------------------------------
+    // View
+    // --------------------------------
+
+    const handleViewOrder = (order) => {
+        setViewingOrder(order);
+        setIsViewModalOpen(true);
     };
 
     // --------------------------------
@@ -154,14 +172,12 @@ function Orders() {
 
     const confirmDeleteOrder = async () => {
         try {
-            // pass the order's items so orderService can give the stock back
             await deleteOrder(orderToDelete.id, orderToDelete.items);
 
             setOrders((prev) =>
                 prev.filter((order) => order.id !== orderToDelete.id)
             );
 
-            // refresh products so the UI shows the restored stock
             const updatedProducts = await getProducts();
             setProducts(updatedProducts);
 
@@ -206,7 +222,7 @@ function Orders() {
                 <OrderTable
                     orders={paginatedOrders}
                     customers={customers}
-                    onView={() => {}}
+                    onView={handleViewOrder}
                     onEdit={handleEditOrder}
                     onDelete={handleDeleteOrder}
                     currentPage={currentPage}
@@ -226,6 +242,16 @@ function Orders() {
                 products={products}
                 purchases={purchases}
                 onAddOrder={saveOrders}
+            />
+
+            <OrderViewModal
+                isOpen={isViewModalOpen}
+                onClose={() => {
+                    setIsViewModalOpen(false);
+                    setViewingOrder(null);
+                }}
+                order={viewingOrder}
+                customers={customers}
             />
 
             <DeleteModal

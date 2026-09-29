@@ -1,102 +1,39 @@
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+// components/dashboard/TopCustomersChart.jsx  (props: data = [{name, total, orders}], loading)
+import { money } from "../../utils/dashboardUtils";
 
-const data = [
-  {
-    name: "Ali Khan",
-    value: 38,
-  },
-  {
-    name: "Ahmad Ali",
-    value: 27,
-  },
-  {
-    name: "Waqar Shah",
-    value: 20,
-  },
-  {
-    name: "Bilal",
-    value: 15,
-  },
-];
+function TopCustomersChart({ data = [], loading }) {
+  const max = Math.max(...data.map((d) => d.total), 1);
 
-const COLORS = [
-  "#2563eb",
-  "#3b82f6",
-  "#60a5fa",
-  "#93c5fd",
-];
-
-function TopCustomersChart() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm h-full">
+      <h2 className="text-sm font-semibold text-slate-800">Top Customers</h2>
+      <p className="text-xs text-slate-400">By total order value</p>
 
-      {/* Header */}
-
-      <div className="flex items-center justify-between mb-6">
-
-        <h2 className="text-xl font-semibold text-slate-800">
-          Top Customers
-        </h2>
-
-        <button className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          View All
-        </button>
-
-      </div>
-
-      {/* Chart */}
-
-      <div className="h-80">
-
-        <ResponsiveContainer width="100%" height="100%">
-
-          <PieChart>
-
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="45%"
-              innerRadius={60}
-              outerRadius={95}
-              paddingAngle={4}
-            >
-              {data.map((entry, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index % COLORS.length]}
+      {loading ? (
+        <p className="py-10 text-center text-xs text-slate-400">Loading…</p>
+      ) : data.length === 0 ? (
+        <p className="py-10 text-center text-xs text-slate-400">No orders yet.</p>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {data.map((c, i) => (
+            <li key={`${c.name}-${i}`}>
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <span className="break-words font-medium text-slate-700">{c.name}</span>
+                <span className="shrink-0 text-slate-500">{money(c.total)}</span>
+              </div>
+              <div className="mt-1 h-1.5 w-full rounded-full bg-slate-100">
+                <div
+                  className="h-1.5 rounded-full bg-violet-500"
+                  style={{ width: `${(c.total / max) * 100}%` }}
                 />
-              ))}
-            </Pie>
-
-            <Tooltip
-              formatter={(value) => [`${value}%`, "Contribution"]}
-            />
-
-            <Legend
-              verticalAlign="bottom"
-              align="center"
-              iconType="circle"
-              wrapperStyle={{
-                paddingTop: "20px",
-                fontSize: "14px",
-              }}
-            />
-
-          </PieChart>
-
-        </ResponsiveContainer>
-
-      </div>
-
+              </div>
+              <p className="mt-0.5 text-[10px] text-slate-400">
+                {c.orders} {c.orders === 1 ? "order" : "orders"}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

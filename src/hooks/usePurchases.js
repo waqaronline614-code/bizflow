@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getPurchase } from "../services/purchaseService";
 
-/**
- * Loads and manages the purchases list.
- * Same shape as useProducts/useOrders so pages can use them consistently.
- */
 export function usePurchases() {
     const [purchases, setPurchases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -28,5 +24,13 @@ export function usePurchases() {
         refetch();
     }, [refetch]);
 
-    return { purchases, setPurchases, isLoading, error, refetch };
+    return {
+        purchases,
+        setPurchases,
+        allPurchases: purchases, // alias — MadePayments.jsx reads the raw list under this name
+        isLoading,
+        error,
+        refetch,
+        refetchPurchases: refetch, // alias — MadePayments.jsx calls this after a payment changes a purchase's balance
+    };
 }

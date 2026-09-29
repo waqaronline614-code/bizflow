@@ -9,10 +9,10 @@ import {
   getCustomers,
   updateCustomer,
   deleteCustomer,
+  getAllCustomerBalances,
 } from "../services/customerService";
 
 function Customers() {
-
 
   const [customers, setCustomers] = useState([]);
 
@@ -46,28 +46,30 @@ function Customers() {
       startIndex + customersPerPage
     );
   }, [customers, currentPage]);
-  // fetch customer
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      try {
 
-        setIsLoading(true);
-        const data = await getCustomers()
-        setCustomers(data)
-
-      }
-      catch (error) {
-        console.error("Failed to fetch customer:", error)
-        setCustomers([])
-      }
-      finally {
-        setIsLoading(false)
-      }
-
+  // --------------------------------
+  // Fetch customers, then enrich with their computed balances
+  // --------------------------------
+  const fetchCustomer = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getCustomers();
+      const withBalances = await getAllCustomerBalances(data);
+      setCustomers(withBalances);
     }
+    catch (error) {
+      console.error("Failed to fetch customer:", error)
+      setCustomers([])
+    }
+    finally {
+      setIsLoading(false)
+    }
+  }
 
+  useEffect(() => {
     fetchCustomer();
   }, [])
+
   // Delete
 
   const handleDelete = (customer) => {
@@ -115,38 +117,23 @@ function Customers() {
     setIsModalOpen(true);
   };
 
-  // Save
-
+  // --------------------------------
+  // Save — re-fetch (with fresh balances) after add/update instead of
+  // patching local state, since balance can't be computed client-side here
+  // --------------------------------
   const saveCustomer = async (customerData) => {
     try {
       if (isEditMode) {
         await updateCustomer(editingCustomer.id, customerData)
-        setCustomers((prev) =>
-          prev.map((customer) =>
-            customer.id === editingCustomer.id
-              ? {
-                ...customer,
-                ...customerData,
-              }
-              : customer
-          )
-        );
-
-        setIsEditMode(false);
-
-        setEditingCustomer(null);
       } else {
-        const newId = await addCustomer(customerData)
-        setCustomers((prev) => [
-          {
-            id: newId,
-            ...customerData,
-          },
-          ...prev,
-        ]);
-
+        await addCustomer(customerData)
         setCurrentPage(1);
       }
+
+      await fetchCustomer();
+
+      setIsEditMode(false);
+      setEditingCustomer(null);
     }
     catch (error) {
       console.error("Failed to save customer:", error);
@@ -167,7 +154,8 @@ function Customers() {
         </div>
 
         <button
-          className="mt-4 md:mt-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition"
+          className="mt-4 md:mt-0 flex items-center gap-2 bg-blue-600
+           hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition"
           onClick={() => {
             setEditingCustomer(null);
             setIsEditMode(false);

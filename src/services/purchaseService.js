@@ -9,7 +9,8 @@ import {
     deleteDoc,
     serverTimestamp,
 } from "firebase/firestore";
-import { generateSequentialId } from "./counterService"
+
+import { generateSequentialId } from "./counterService";
 import { adjustStockForItems } from "./productService";
 
 const purchasesRef = collection(db, "purchases");
@@ -22,21 +23,29 @@ export const addPurchase = async (data) => {
 
     const docRef = await addDoc(purchasesRef, {
         ...data,
+
+        paymentMethod: data.paymentMethod || "",
+        referenceNote: data.referenceNote || "",
+
         purchaseNo,
         createdAt: serverTimestamp(),
     });
 
-    // purchase happened -> increase stock for each item purchased
+    // Purchase happened -> increase stock
     await adjustStockForItems(data.items, "increase");
 
-    return { id: docRef.id, purchaseNo };
+    return {
+        id: docRef.id,
+        purchaseNo,
+    };
 };
 
-//---------------------------------
+// --------------------------------
 // Get all purchases
-//---------------------------------
+// --------------------------------
 export const getPurchase = async () => {
     const snapshot = await getDocs(purchasesRef);
+
     return snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -48,12 +57,22 @@ export const getPurchase = async () => {
 // --------------------------------
 export const updatePurchase = async (id, data, oldItems) => {
     const purchaseDoc = doc(db, "purchases", id);
-    await updateDoc(purchaseDoc, data);
 
+    await updateDoc(purchaseDoc, {
+        ...data,
+
+        // Make sure updated payment information is saved
+        paymentMethod: data.paymentMethod || "",
+        referenceNote: data.referenceNote || "",
+    });
+
+    // Remove old stock
     if (oldItems) {
-        await adjustStockForItems(oldItems, "decrease"); // undo old purchase
+        await adjustStockForItems(oldItems, "decrease");
     }
-    await adjustStockForItems(data.items, "increase"); // apply new purchase
+
+    // Add new stock
+    await adjustStockForItems(data.items, "increase");
 };
 
 // --------------------------------
@@ -62,17 +81,16 @@ export const updatePurchase = async (id, data, oldItems) => {
 export const deletePurchase = async (id, items) => {
     const purchaseDoc = doc(db, "purchases", id);
 
-    // Check the purchase still exists before doing anything. If it was
-    // already deleted (e.g. a duplicate/double click), skip entirely so
-    // stock doesn't get removed a second time.
     const purchaseSnap = await getDoc(purchaseDoc);
+
     if (!purchaseSnap.exists()) {
         return;
     }
 
     await deleteDoc(purchaseDoc);
 
+    // Remove stock that was added by this purchase
     if (items) {
-        await adjustStockForItems(items, "decrease"); // remove the stock it added
+        await adjustStockForItems(items, "decrease");
     }
 };

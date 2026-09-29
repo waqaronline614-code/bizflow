@@ -48,7 +48,7 @@ function CustomerTable({
             {/* Table */}
             <div className="overflow-x-auto">
 
-                <table className="w-full min-w-[750px]">
+                <table className="w-full min-w-[850px]">
 
                     {/* Header */}
                     <thead className="bg-slate-50 border-b border-slate-200">
@@ -64,6 +64,10 @@ function CustomerTable({
 
                             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">
                                 Email
+                            </th>
+
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
+                                Balance
                             </th>
 
                             <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
@@ -83,14 +87,16 @@ function CustomerTable({
                         {customers.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan="5"
+                                    colSpan="6"
                                     className="py-10 text-center text-sm text-slate-500"
                                 >
                                     No customers added yet.
                                 </td>
                             </tr>
                         ) : (
-                            customers.map((customer) => (
+                            customers.map((customer) => {
+                                const balance = customer.balance || 0;
+                                return (
                                 <tr
                                     key={customer.id}
                                     className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-200"
@@ -109,6 +115,32 @@ function CustomerTable({
                                     {/* Email */}
                                     <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
                                         {customer.email}
+                                    </td>
+
+                                    {/* Balance */}
+                                    <td className="px-3 py-3 text-center whitespace-nowrap">
+                                        {balance > 0 ? (
+                                            <div>
+                                                <div className="text-sm font-semibold text-red-600">
+                                                    Rs {balance.toLocaleString()}
+                                                </div>
+                                                <div className="text-[11px] text-red-400">Outstanding</div>
+                                            </div>
+                                        ) : balance < 0 ? (
+                                            <div>
+                                                <div className="text-sm font-semibold text-green-600">
+                                                    Rs {Math.abs(balance).toLocaleString()}
+                                                </div>
+                                                <div className="text-[11px] text-green-500">Credit</div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-500">
+                                                    Rs 0
+                                                </div>
+                                                <div className="text-[11px] text-slate-400">Settled</div>
+                                            </div>
+                                        )}
                                     </td>
 
                                     {/* Status */}
@@ -159,7 +191,8 @@ function CustomerTable({
                                     </td>
 
                                 </tr>
-                            ))
+                                );
+                            })
                         )}
 
                     </tbody>

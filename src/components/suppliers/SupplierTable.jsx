@@ -17,7 +17,7 @@ function SupplierTable({
             {/* Table */}
             <div className="overflow-x-auto">
 
-                <table className="w-full min-w-[750px]">
+                <table className="w-full min-w-[850px]">
 
                     {/* Header */}
                     <thead className="bg-slate-50 border-b border-slate-200">
@@ -40,6 +40,10 @@ function SupplierTable({
                             </th>
 
                             <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
+                                Balance
+                            </th>
+
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700">
                                 Actions
                             </th>
 
@@ -52,14 +56,16 @@ function SupplierTable({
                         {suppliers.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan="5"
+                                    colSpan="6"
                                     className="py-10 text-center text-sm text-slate-500"
                                 >
                                     No Suppliers added yet.
                                 </td>
                             </tr>
                         ) : (
-                            suppliers.map((supplier) => (
+                            suppliers.map((supplier) => {
+                                const balance = supplier.balance || 0;
+                                return (
                                 <tr
                                     key={supplier.id}
                                     className="border-b border-slate-100 hover:bg-blue-50 transition-colors duration-200"
@@ -83,6 +89,33 @@ function SupplierTable({
                                     {/* Address */}
                                     <td className="px-3 py-3 text-center text-sm text-slate-600 whitespace-nowrap">
                                         {supplier.address}
+                                    </td>
+
+                                    {/* Balance — from the supplier's side, a
+                                        positive balance means WE owe THEM */}
+                                    <td className="px-3 py-3 text-center whitespace-nowrap">
+                                        {balance > 0 ? (
+                                            <div>
+                                                <div className="text-sm font-semibold text-red-600">
+                                                    Rs {balance.toLocaleString()}
+                                                </div>
+                                                <div className="text-[11px] text-red-400">We Owe</div>
+                                            </div>
+                                        ) : balance < 0 ? (
+                                            <div>
+                                                <div className="text-sm font-semibold text-green-600">
+                                                    Rs {Math.abs(balance).toLocaleString()}
+                                                </div>
+                                                <div className="text-[11px] text-green-500">Advance Paid</div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-500">
+                                                    Rs 0
+                                                </div>
+                                                <div className="text-[11px] text-slate-400">Settled</div>
+                                            </div>
+                                        )}
                                     </td>
 
                                     {/* Actions */}
@@ -120,7 +153,8 @@ function SupplierTable({
                                     </td>
 
                                 </tr>
-                            ))
+                                );
+                            })
                         )}
 
                     </tbody>

@@ -1,58 +1,41 @@
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
+// components/dashboard/SalesChart.jsx  (props: data = [{label, value}], loading)
+import { compact, money } from "../../utils/dashboardUtils";
 
-const salesData = [
-  { month: "Jan", sales: 4000 },
-  { month: "Feb", sales: 3000 },
-  { month: "Mar", sales: 5000 },
-  { month: "Apr", sales: 4500 },
-  { month: "May", sales: 6000 },
-  { month: "Jun", sales: 5500 },
-  { month: "Jul", sales: 7000 },
-];
+function SalesChart({ data = [], loading }) {
+  const max = Math.max(...data.map((d) => d.value), 1);
+  const total = data.reduce((s, d) => s + d.value, 0);
 
-function SalesChart() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-
-        <h2 className="text-xl font-semibold text-slate-800">
-          Sales Overview
-        </h2>
-
-        <button className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          View All
-        </button>
-
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-800">Sales Overview</h2>
+          <p className="text-xs text-slate-400">Revenue, last 6 months</p>
+        </div>
+        <p className="text-xs font-medium text-slate-600">{money(total)}</p>
       </div>
 
-      <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={salesData}>
-            <CartesianGrid strokeDasharray="3 3" />
-
-            <XAxis dataKey="month" />
-
-            <YAxis />
-
-            <Tooltip />
-
-            <Area
-              type="monotone"
-              dataKey="sales"
-              stroke="#2563eb"
-              fill="#93c5fd"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {loading ? (
+        <p className="py-16 text-center text-xs text-slate-400">Loading…</p>
+      ) : total === 0 ? (
+        <p className="py-16 text-center text-xs text-slate-400">No sales in this period yet.</p>
+      ) : (
+        <div className="mt-4 flex h-44 items-end gap-3">
+          {data.map((d) => (
+            <div key={d.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+              <span className="text-[10px] text-slate-500" title={money(d.value)}>
+                {d.value ? compact(d.value) : ""}
+              </span>
+              <div
+                className="w-full rounded-t-md bg-blue-500/80 transition-all"
+                style={{ height: `${Math.max((d.value / max) * 100, d.value ? 4 : 1)}%` }}
+                title={money(d.value)}
+              />
+              <span className="text-[11px] text-slate-500">{d.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { useEffect } from "react";
 import ItemsEditor from "../common/ItemsEditor";
+import {useAccounts} from "../../hooks/Useaccounts"
+
 
 function AddOrderModal({
     isOpen,
@@ -30,11 +32,13 @@ function AddOrderModal({
             paymentStatus: "",
             orderDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         },
     });
-
+    const {accounts} = useAccounts()
     const { fields: items, append, remove, update } = useFieldArray({
         control,
         name: "items",
@@ -53,6 +57,8 @@ function AddOrderModal({
                 paymentStatus: editingOrder.paymentStatus || "",
                 orderDate: editingOrder.orderDate || "",
                 amountPaid: editingOrder.amountPaid || "",
+                paymentMethod: editingOrder.paymentMethod || "",
+                referenceNote: editingOrder.referenceNote || "",
                 totalDiscount: editingOrder.totalDiscount || 0,
                 items: editingOrder.items || [],
             });
@@ -70,10 +76,6 @@ function AddOrderModal({
     // =========================================================
     // STOCK CALCULATION
     // =========================================================
-    // When editing an existing saved order, the quantities in that order
-    // were already subtracted from product.stock in the database. Add
-    // them back here so the person can redistribute up to their original
-    // total, not just whatever happens to be left in stock right now.
     const originalOrderQuantities = (() => {
         const map = {};
         if (isEdit && editingOrder?.items) {
@@ -145,33 +147,53 @@ function AddOrderModal({
             return;
         }
 
-        const orderData = { ...data, paymentStatus, items };
-        onAddOrder(orderData);
+        // amountPaid never gets saved onto the order doc directly — it's
+        // sent as paidAmount so ordersService can sync the order's ONE
+        // payment record to match (update it, create it, or delete it if
+        // cleared to 0), instead of writing a raw number onto the order.
+        // paymentMethod travels alongside it so ordersService knows which
+        // cash/bank account to credit for that paidAmount.
+        const { amountPaid: rawAmountPaid, paymentMethod, referenceNote, ...rest } = data;
+        const paidAmount = safeNum(rawAmountPaid);
 
+        const orderData = {
+            ...rest,
+            paymentStatus,
+            items,
+            grandTotal: netAmount, // persist the computed total — wasn't saved before
+            paidAmount,
+            paymentMethod: paidAmount > 0 ? paymentMethod : null,
+            referenceNote: paidAmount > 0 ? referenceNote || "" : "",
+        };
+
+        onAddOrder(orderData);
         reset({
             customerId: "",
             paymentStatus: "",
             orderDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         });
 
         onClose();
     };
-
     const handleCancel = () => {
         reset({
             customerId: "",
             paymentStatus: "",
             orderDate: "",
             amountPaid: "",
+            paymentMethod: "",
+            referenceNote: "",
             totalDiscount: 0,
             items: [],
         });
         onClose();
     };
-
+    
     if (!isOpen) return null;
 
     return (
@@ -338,6 +360,48 @@ function AddOrderModal({
                                     <p className="text-xs text-red-500 mt-1 text-right">
                                         {errors.amountPaid.message}
                                     </p>
+                                )}
+
+                                {amountPaid > 0 && (
+                                    <div className="flex items-center justify-between mt-3">
+                                        <span className="text-sm font-bold text-slate-800">
+                                            Received Into
+                                        </span>
+                                        <select
+                                            {...register("paymentMethod", {
+                                                validate: (value) =>
+                                                    amountPaid <= 0 || !!value || "Choose an account",
+                                            })}
+                                            className="w-40 h-11 px-3 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="">Select account</option>
+                                            {accounts.map((account) => (
+                                                <option key={account.id} value={account.name}>
+                                                    {account.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                {errors.paymentMethod && (
+                                    <p className="text-xs text-red-500 mt-1 text-right">
+                                        {errors.paymentMethod.message}
+                                    </p>
+                                )}
+
+                                {amountPaid > 0 && (
+                                    <div className="mt-3">
+                                        <label className="block text-xs font-medium text-slate-500 mb-1 text-right">
+                                            Reference / Note (optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. cheque no., transaction id"
+                                            {...register("referenceNote")}
+                                            className="w-full h-10 px-3 rounded-xl border
+                                             border-slate-300 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 )}
                             </div>
 
