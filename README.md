@@ -30,7 +30,7 @@ A business inventory and accounting web app for small shops and distributors. Bi
 - **Purchases:** purchases by date, supplier, and product
 - Date range filters, search, and CSV export on the reports
 
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](docs/screenshots/customer.PNG)
 
 ## Why shop owners will like it
 
@@ -45,25 +45,25 @@ A business inventory and accounting web app for small shops and distributors. Bi
 ### Sell and track customers
 Create orders, apply discounts, and record payments. Each order shows what was paid, what is still owed, and its status (Paid or Partial).
 
-![Orders](docs/screenshots/orders.png)
+![Orders](docs/screenshots/order.png)
 
 Keep a customer list with phone, email and outstanding balance, so you know who to follow up with.
 
-![Customers](docs/screenshots/customers.png)
+![Customers](docs/screenshots/customer.png)
 
 ### Buy and receive goods
 Record purchases from suppliers with invoice numbers like PUR001, discounts, and payments made. Stock is added automatically.
 
-![Purchases](docs/screenshots/purchases.png)
+![Purchases](docs/screenshots/purchase.png)
 
 ### Manage your money
 Keep your cash and bank accounts in one place and watch their balances change as you sell, buy and spend.
 
-![Accounts](docs/screenshots/accounts.png)
+![Accounts](docs/screenshots/account.png)
 
 Record shop expenses like rent and salaries, and choose which account paid for them.
 
-![Expenses](docs/screenshots/expenses.png)
+![Expenses](docs/screenshots/expense.png)
 
 ### Understand your business with reports
 - **Profit & Loss:** revenue, cost of goods, expenses and net profit for any period
