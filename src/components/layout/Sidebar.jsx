@@ -217,16 +217,19 @@ function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
           <span>Expenses</span>
         </NavLink>
 
-         {/* REPORTS */}
+        {/*Reports*/}
 
         <p className="px-6 mt-8 mb-3 text-xs uppercase tracking-widest text-slate-500">
           Reports
         </p>
 
-        <div className="mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition cursor-pointer">
-          <FiBarChart2 size={20} />
+        <NavLink to="/reports"
+          className={({ isActive }) => `mx-3 mb-1 flex items-center gap-3 rounded-lg px-4 py-3 transition cursor-pointer
+            ${isActive ? "bg-blue-600" : " hover:bg-slate-800"}
+        `}>
+          <FiBriefcase size={20} />
           <span>Reports</span>
-        </div>
+        </NavLink>
 
         {/* SYSTEM */}
 

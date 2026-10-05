@@ -14,28 +14,43 @@ import ReceivedPayments from "../pages/ReceivedPayments"
 import MadePayments from "../pages/Madepayments";
 import Accounts from "../pages/Accounts";
 import Expenses from "../pages/Expenses";
+import ReportsHome from "../pages/reports/Reportshome"
+import ProfitLossReport from "../pages/reports/ProfitLossReport"
+import ReceivablesReport from "../pages/reports/ReceivablesReport"
+import PayablesReport from "../pages/reports/PayablesReport"
+import StockReport from "../pages/reports/StockReport";
+import SalesReport from "../pages/reports/SaleReports";
+import PurchasesReport from "../pages/reports/PurchasesReport";
 
-function AppRoutes()
-{
-    return(
+
+
+function AppRoutes() {
+    return (
         <Routes>
-           <Route path="/" element={<Navigate to="/login" replace />} />
-           <Route path="/login" element={<Login />} />
-           <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route element={<ProtectedRoute>
-            <DashboardLayout/></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard/>} />  
-            <Route path="/customers" element={<Customers/>}/>
-            <Route path="/products" element={<Products/>}/>
-            <Route path="/suppliers" element={<Suppliers/>}/>
-            <Route path="/purchases" element={<Purchases/>}/>
-            <Route path="/orders" element={<Orders/>}/>
-            <Route path="/receivedPayments" element={<ReceivedPayments/>}/>
-            <Route path="/madePayments" element={<MadePayments/>}/>
-            <Route path="/accounts" element={<Accounts/>}/>
-            <Route path="/expenses" element={<Expenses/>}/>
+                <DashboardLayout /></ProtectedRoute>}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/purchases" element={<Purchases />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/receivedPayments" element={<ReceivedPayments />} />
+                <Route path="/madePayments" element={<MadePayments />} />
+                <Route path="/accounts" element={<Accounts />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/reports" element={<ReportsHome />} />
+                <Route path="/reports/profit-loss" element={<ProfitLossReport />} />
+                <Route path="/reports/receivables" element={<ReceivablesReport />} />
+                <Route path="/reports/payables" element={<PayablesReport />} />
+                <Route path="/reports/stock" element={<StockReport />} />
+                <Route path="/reports/sales" element={<SalesReport />} />
+                <Route path="/reports/purchases" element={<PurchasesReport />} />
             </Route>
-           <Route path="*" element={<NotFound/>} />
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 }

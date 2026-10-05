@@ -24,6 +24,14 @@ function Navbar({ setIsSidebarOpen }) {
     "/receivedPayments": 'Received Payments',
     "/accounts": 'Accounts',
     "/expenses": 'Expenses',
+    "/reports": 'Reports',
+    "/reports/profit-loss": 'Profit & Loss',
+    "/reports/receivables" : "Customer balances",
+    "/reports/payables"   :  "Supplier balances",
+    "/reports/stock"   :  "Stock Report",
+    "/reports/purchases" : "Purchases Report",
+    "/reports/sales"  : "Sales Report"
+    
   };
 
   const currentPage = pageTitles[location.pathname] || "Dashboard";
