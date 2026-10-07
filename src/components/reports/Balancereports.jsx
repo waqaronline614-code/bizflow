@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { usePartyBalances } from "../../hooks/reports/UsePartyBalance";
-import { money } from "../../utils/reportHelpers";
+import { money } from "../../utils/Reporthelpers";
 
 export default function BalanceReport({ config, title, partyLabel, totalLabel }) {
   const { rows, loading, error } = usePartyBalances(config);

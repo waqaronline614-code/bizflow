@@ -5,7 +5,7 @@ import Signup from "../pages/SignUp"
 import NotFound from '../pages/NotFound'
 import DashboardLayout from '../layouts/DashboardLayout'
 import Customers from '../pages/Customers'
-import Products from "../pages/products";
+import Products from "../pages/Products";
 import Suppliers from "../pages/Suppliers";
 import Purchases from "../pages/Purchases";
 import ProtectedRoute from "../routes/ProtectedRoute";
@@ -16,7 +16,7 @@ import Accounts from "../pages/Accounts";
 import Expenses from "../pages/Expenses";
 import ReportsHome from "../pages/reports/Reportshome"
 import ProfitLossReport from "../pages/reports/ProfitLossReport"
-import ReceivablesReport from "../pages/reports/ReceivablesReport"
+import ReceivablesReport from "../pages/reports/Receivablesreport"
 import PayablesReport from "../pages/reports/Payablesreport"
 import StockReport from "../pages/reports/StockReport";
 import SalesReport from "../pages/reports/SaleReports";

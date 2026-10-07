@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useStockReport } from "../../hooks/reports/useStockReport";
-import { money, downloadCSV } from "../../utils/reportHelpers";
+import { money, downloadCSV } from "../../utils/Reporthelpers";
 
 const STATUS = {
   ok: { label: "In stock", cls: "bg-green-100 text-green-700" },
