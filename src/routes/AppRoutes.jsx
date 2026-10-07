@@ -17,7 +17,7 @@ import Expenses from "../pages/Expenses";
 import ReportsHome from "../pages/reports/Reportshome"
 import ProfitLossReport from "../pages/reports/ProfitLossReport"
 import ReceivablesReport from "../pages/reports/ReceivablesReport"
-import PayablesReport from "../pages/reports/PayablesReport"
+import PayablesReport from "../pages/reports/Payablesreport"
 import StockReport from "../pages/reports/StockReport";
 import SalesReport from "../pages/reports/SaleReports";
 import PurchasesReport from "../pages/reports/PurchasesReport";
